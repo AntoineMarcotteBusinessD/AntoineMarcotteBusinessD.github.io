@@ -1,0 +1,666 @@
+/* style.css */
+
+/* --- Variables CSS pour la palette de couleurs --- */
+:root {
+    --primary-color: #3498db; /* Bleu vif pour les éléments principaux */
+    --secondary-color: #2ecc71; /* Vert pour les succès/éléments secondaires */
+    --background-color: #ecf0f1; /* Gris clair pour le fond de l'application */
+    --card-background: #ffffff; /* Blanc pur pour les cartes et sections */
+    --text-color: #34495e; /* Gris foncé pour le texte principal */
+    --text-light: #7f8c8d; /* Gris moyen pour le texte secondaire/description */
+    --border-color: #dcdcdc; /* Gris très clair pour les bordures */
+    --error-color: #e74c3c; /* Rouge pour les erreurs/suppressions */
+    --success-color: #27ae60; /* Vert foncé pour les succès confirmés */
+    --hover-color: #2980b9; /* Bleu plus foncé au survol */
+
+    /* NOUVELLE VARIABLE : Couleur pour les séances planifiées (gris-bleu) */
+    --planned-color: #aeb6bf; /* Un gris-bleu clair et apaisant */
+    --planned-border-color: #8c98a3; /* Bordure légèrement plus foncée */
+}
+
+/* --- Styles de base et mise en page générale --- */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* S'assure que le corps prend au moins toute la hauteur de la vue */
+}
+
+.container {
+    max-width: 960px; /* Largeur maximale pour le contenu */
+    margin: 0 auto; /* Centre le conteneur */
+    padding: 1rem;
+    flex-grow: 1; /* Permet au contenu de prendre l'espace disponible */
+}
+
+/* --- En-tête de l'application --- */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    position: sticky; /* Rends l'en-tête collant en haut */
+    top: 0;
+    z-index: 1000; /* Assure qu'il reste au-dessus des autres éléments */
+}
+
+header h1 {
+    text-align: center;
+    margin: 0;
+    font-size: 2.2em;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap; /* Permet aux boutons de passer à la ligne sur petits écrans */
+}
+
+nav button {
+    background-color: var(--hover-color); /* Couleur légèrement plus foncée pour les boutons de nav */
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.2s ease;
+}
+
+nav button:hover {
+    background-color: var(--secondary-color); /* Vert au survol pour un look interactif */
+}
+
+/* Nouveau style pour le bouton de bascule des filtres quand il est actif */
+#filterToggleBtn.active {
+    background-color: var(--secondary-color);
+}
+
+/* --- Styles des sections générales --- */
+/* Nouvelle classe pour gérer la largeur et le centrage des sections de contenu */
+.content-section {
+    max-width: 700px; /* Largeur maximale pour les sections de contenu */
+    margin: 2rem auto; /* Centre la section */
+    background-color: var(--card-background);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+
+section h2 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.8em;
+}
+
+.no-sessions-message, .no-results-message {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-light);
+    margin-top: 2rem;
+}
+
+/* --- Styles des formulaires --- */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Inclut le padding et la bordure dans la largeur totale */
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* --- Styles des boutons génériques --- */
+.btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: inline-block; /* Pour un bon affichage des marges */
+    text-align: center;
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+}
+
+.btn:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background-color: var(--error-color);
+}
+
+.btn-danger:hover {
+    background-color: #c0392b; /* Teinte plus foncée */
+}
+
+.btn.small-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9em;
+}
+
+/* NOUVEAUX STYLES pour les boutons avec icônes */
+.btn-icon-left, .btn-icon-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Espace entre l'icône et le texte */
+}
+
+.btn-icon-left svg {
+    order: -1; /* Place l'icône à gauche */
+}
+
+.btn-icon-right svg {
+    order: 1; /* Place l'icône à droite */
+}
+
+/* Styles spécifiques pour le bouton "Retour" */
+.btn.btn-icon-left { /* Cible spécifiquement le bouton "Retour" */
+    background: none; /* Fond transparent */
+    border: 1px solid var(--primary-color); /* Bordure bleue */
+    color: var(--primary-color); /* Texte bleu */
+    padding: 0.7rem 1.2rem; /* Légèrement plus petit pour un look épuré */
+}
+
+.btn.btn-icon-left:hover {
+    background-color: rgba(52, 152, 219, 0.1); /* Léger fond bleu au survol */
+    transform: translateY(-1px);
+}
+
+.btn-icon-left svg {
+    stroke: var(--primary-color); /* Couleur de l'icône */
+}
+
+.btn-icon-left:hover svg {
+    stroke: var(--primary-color); /* Conserver la couleur au survol */
+}
+
+
+/* --- Styles spécifiques à la section de création de séance (planification) --- */
+.create-session-section h2 {
+    color: var(--secondary-color); /* Vert pour les titres de création */
+}
+
+.create-session-section form {
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--card-background);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.create-session-section .btn {
+    margin-right: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* --- Styles spécifiques à la section "Séance du Jour" (complétion) --- */
+.today-session-section h2 {
+    color: var(--secondary-color); /* Vert pour les titres de complétion */
+}
+
+.today-session-section form {
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--card-background);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.today-session-section .btn {
+    margin-right: 0.5rem;
+    margin-top: 1rem;
+}
+
+.exercise-block h3 .exercise-name-display { /* Pour le nom de l'exercice affiché dans la complétion */
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.series-row .series-label {
+    font-weight: bold;
+    min-width: 80px; /* Pour aligner les labels */
+}
+
+
+/* --- Styles pour la section de visualisation des séances (Mes Séances) --- */
+.view-sessions-section {
+    /* La largeur et le centrage sont maintenant gérés par .content-section */
+    padding: 1rem; /* Conserve le padding interne */
+}
+
+#filterToggleBtn { /* Style du bouton de bascule des filtres */
+    margin-bottom: 1rem; /* Espace sous le bouton */
+}
+
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    align-items: flex-end;
+    max-height: 300px;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin-bottom 0.4s ease-out;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.filter-controls.hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+.filter-controls label {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+    flex-basis: 100%;
+}
+
+.filter-controls input[type="date"],
+.filter-controls input[type="text"],
+.filter-controls select {
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.filter-controls .btn {
+    align-self: flex-end;
+    padding: 0.7rem 1.2rem;
+}
+
+/* Styles pour les cartes de séance cliquables */
+.session-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    display: flex; /* Revert to row for header part */
+    justify-content: space-between; /* Space out content and delete button */
+    align-items: center; /* Align items vertically */
+    position: relative; /* Keep for potential absolute positioning needs */
+}
+
+.session-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.session-card-header { /* Structure pour le contenu et le bouton de suppression */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    /* No padding-bottom here, padding is on .session-card itself */
+}
+
+.session-card-content {
+    flex-grow: 1;
+    padding-right: 1rem; /* Add some space before the delete button */
+}
+
+.session-card-content h3 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.session-card-description {
+    color: var(--text-light);
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+}
+
+/* Style pour le bouton de suppression */
+.delete-session-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* Prevents button from shrinking */
+    width: 40px;
+    height: 40px;
+    z-index: 1; /* Ensure it's clickable */
+}
+
+.delete-session-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.delete-session-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* NOUVEAUX STYLES POUR LA VUE DÉDIÉE DES DÉTAILS DE SÉANCE */
+.view-single-session-section {
+    /* Utilise déjà .content-section pour la largeur et le centrage */
+    /* Pas de styles spécifiques ici si .content-section gère tout */
+    padding-bottom: 1.5rem; /* Espace pour les boutons du bas (s'il y en avait) */
+}
+
+.session-detail-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem; /* Espace entre les boutons */
+}
+
+.view-single-session-section h2 {
+    margin-top: 0; /* Réinitialiser la marge du h2 pour ne pas avoir de double espace */
+    padding-top: 1.5rem; /* Espace avant le titre */
+    border-top: 1px solid var(--border-color); /* Ligne de séparation avant le titre */
+}
+
+.session-details-content {
+    margin-top: 1.5rem;
+    /* La bordure est maintenant sur le h2 */
+    padding-top: 0; /* Pas de padding supérieur ici car géré par le h2 */
+}
+
+.view-single-session-section .btn { /* Style les boutons génériques si non surchargés */
+    margin-right: 0; /* Pas de marge à droite ici, géré par le gap */
+    margin-top: 0; /* Pas de marge supérieure ici */
+}
+
+.exercise-display {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background-color: var(--background-color);
+    border-radius: 5px;
+}
+
+.exercise-display h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.exercise-display ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.exercise-display li {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95em;
+    color: var(--primary-color);
+}
+
+/* Styles pour les statuts de séance dans "Mes Séances" */
+.session-status {
+    font-size: 0.8em;
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    margin-left: 0.5em;
+    font-weight: normal;
+    color: white;
+}
+
+.session-completed .session-status {
+    background-color: var(--success-color);
+}
+
+/* Modification : Style pour les séances planifiées */
+.session-planned .session-status {
+    background-color: var(--planned-color); /* Nouvelle couleur pour "Planifiée" */
+}
+
+.session-card.session-completed {
+    border-left: 5px solid var(--success-color);
+}
+
+.session-card.session-planned {
+    border-left: 5px solid var(--planned-border-color); /* Nouvelle couleur de bordure pour "Planifiée" */
+}
+
+
+/* Styles pour les blocs d'exercices dans les formulaires */
+.exercise-block {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: #f9f9f9; /* Légèrement différent pour les blocs d'exercice */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.exercise-block h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.exercise-block .exercise-name {
+    flex-grow: 1;
+    margin-right: 10px;
+    padding: 0.5rem;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.series-container {
+    margin-top: 1rem;
+}
+
+.series-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    align-items: center;
+    padding: 0.6rem;
+    background-color: var(--background-color);
+    border-radius: 4px;
+}
+
+.series-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+    padding: 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.series-row .btn-danger {
+    padding: 0.6rem 1rem;
+    font-size: 0.9em;
+}
+
+
+/* --- Pied de page --- */
+footer {
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    color: var(--text-light);
+    font-size: 0.9em;
+    background-color: var(--card-background);
+    border-top: 1px solid var(--border-color);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    nav button {
+        width: 100%;
+        padding: 0.6rem 1rem;
+    }
+
+    .content-section {
+        margin-left: 1rem;
+        margin-right: 1rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    #filterToggleBtn {
+        width: 100%; /* Le bouton de filtre prend toute la largeur sur mobile */
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-controls label {
+        margin-bottom: 0.5rem;
+    }
+    .filter-controls input, .filter-controls select, .filter-controls .btn {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .session-card {
+        flex-direction: column; /* Revenir en colonne pour l'ensemble de la carte sur mobile */
+        align-items: stretch;
+    }
+
+    .session-card-header { /* Revenir en colonne pour le header de la carte sur mobile */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem; /* Ajouter un petit padding pour séparer du reste si en colonne */
+    }
+
+    .session-card-content {
+        padding-right: 0; /* Supprimer le padding droit */
+        margin-bottom: 0.5rem; /* Ajouter un espace sous le contenu */
+    }
+
+    .session-card-content h3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .session-card-content h3 .session-status {
+        margin-left: 0;
+    }
+
+    .delete-session-btn {
+        position: static;
+        width: 100%; /* Prend toute la largeur sur mobile */
+        height: auto;
+        border-radius: 5px;
+        padding: 0.8rem 1.5rem;
+        align-self: flex-end; /* Garde à droite si possible */
+        margin-top: 0.5rem; /* Pour espacer du contenu */
+        color: white;
+        background-color: var(--error-color);
+    }
+    .delete-session-btn:hover {
+        background-color: #c0392b;
+    }
+    .delete-session-btn svg {
+        margin-right: 0.5rem;
+    }
+
+    .series-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .series-row input[type="number"] {
+        width: 100%;
+        min-width: unset;
+    }
+    .series-row .series-label {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 0.3rem;
+    }
+    .series-row .btn-danger {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    /* Adapte les boutons Retour/Supprimer sur mobile */
+    .session-detail-actions {
+        flex-direction: column; /* Empile les boutons sur mobile */
+        gap: 0.8rem;
+    }
+    .session-detail-actions .btn {
+        width: 100%; /* Les boutons prennent toute la largeur */
+        justify-content: center; /* Centre le contenu des boutons */
+    }
+}
