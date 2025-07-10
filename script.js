@@ -43,7 +43,6 @@ function showCreateSessionView() {
 
     appContainer.innerHTML = `
         <section class="create-session-section content-section">
-            <h2>Nouvelle Séance</h2>
             <form id="createSessionForm">
                 <div class="form-group">
                     <label for="sessionDate">Date :</label>
@@ -259,6 +258,8 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
             </section>
         `;
     }
+    // Pas de bouton de navigation spécifique pour cette vue "Séance du Jour"
+    activateNavLink(null); 
 }
 
 /**
@@ -276,14 +277,13 @@ function addSeriesRow(container, exerciseIndex, seriesIndex, reps = '', weight =
     seriesRow.innerHTML = `
         <span class="series-label">Série ${seriesIndex + 1} :</span>
         <div class="form-group">
-            <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0">
+            <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0" required>
         </div>
         <div class="form-group">
-            <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0">
+            <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0" required>
         </div>
         <div class="form-group">
-            <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${rest}" min="0">
-        </div>
+            <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${rest}" min="0"> </div>
         <button type="button" class="btn btn-danger small-btn remove-series-btn">X</button>
     `;
     container.appendChild(seriesRow);
@@ -314,17 +314,16 @@ function handleCompleteSessionSubmit(sessionToComplete) {
             const weight = weightInput.value.trim() !== '' ? parseFloat(weightInput.value) : null;
             const rest = restInput.value.trim() !== '' ? parseInt(restInput.value) : null;
 
-            if (reps === null || weight === null || rest === null) {
+            // Validation : reps et weight sont obligatoires
+            if (reps === null || weight === null) {
                 allFieldsValid = false;
-                // Vous pouvez ajouter un feedback visuel ici, par ex. border-color: red
                 repsInput.style.borderColor = reps === null ? 'red' : '';
                 weightInput.style.borderColor = weight === null ? 'red' : '';
-                restInput.style.borderColor = rest === null ? 'red' : '';
             } else {
                 repsInput.style.borderColor = '';
                 weightInput.style.borderColor = '';
-                restInput.style.borderColor = '';
             }
+            restInput.style.borderColor = ''; // Réinitialiser le style pour le repos
 
             seriesData.push({ reps, weight, rest });
         });
@@ -332,7 +331,7 @@ function handleCompleteSessionSubmit(sessionToComplete) {
     });
 
     if (!allFieldsValid) {
-        alert('Veuillez remplir toutes les informations (répétitions, poids, repos) pour chaque série.');
+        alert('Veuillez renseigner les champs "Répétitions" et "Poids (kg)" pour chaque série.');
         return;
     }
 
@@ -392,10 +391,9 @@ function showViewSessionsView() {
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
 
     // Ajouter les écouteurs d'événements pour les filtres
-    if (filterToggleBtn && filterControls) { // Vérification supplémentaire, par sécurité
+    if (filterToggleBtn && filterControls) {
         filterToggleBtn.addEventListener('click', () => {
             filterControls.classList.toggle('hidden');
-            // 'active' était une classe d'exemple, j'ai enlevé la ligne qui l'ajoutait
             filterToggleBtn.textContent = filterControls.classList.contains('hidden') ? 'Afficher les Filtres' : 'Masquer les Filtres';
         });
     }

@@ -76,8 +76,8 @@ h1, h2, h3, h4 {
 }
 
 .main-header .nav-btn {
-    background-color: var(--color-primary);
-    color: var(--color-white);
+    background-color: var(--color-dark); /* Fond sombre pour les inactifs */
+    color: var(--color-white); /* Texte blanc pour les inactifs */
     border: none;
     padding: 0.75rem 1.25rem;
     border-radius: 5px;
@@ -87,19 +87,20 @@ h1, h2, h3, h4 {
 }
 
 .main-header .nav-btn:hover {
-    background-color: var(--color-blue-dark);
+    background-color: var(--color-blue-dark); /* Hover pour les inactifs */
+    color: var(--color-white); /* Texte blanc pour les inactifs */
 }
 
 .main-header .nav-btn.active-nav-btn {
-    background-color: var(--color-dark); /* Couleur différente pour le bouton actif */
-    color: var(--color-primary); /* Couleur du texte du bouton actif */
-    border: 1px solid var(--color-primary); /* Bordure pour le bouton actif */
+    background-color: var(--color-primary); /* Fond clair pour le bouton actif */
+    color: var(--color-dark); /* Texte sombre pour le bouton actif */
+    border: 1px solid var(--color-primary); /* Bordure assortie */
     font-weight: bold;
 }
 /* S'assurer que le hover sur l'actif est aussi distinct */
 .main-header .nav-btn.active-nav-btn:hover {
-    background-color: var(--color-dark); /* Garde la même couleur de fond */
-    color: var(--color-primary); /* Garde la même couleur de texte */
+    background-color: var(--color-primary); /* Garde la même couleur de fond au hover */
+    color: var(--color-dark); /* Garde la même couleur de texte au hover */
 }
 
 /* Footer */
@@ -246,8 +247,8 @@ h1, h2, h3, h4 {
 }
 
 /* Section "Nouvelle Séance" */
-.create-session-section .form-group button {
-    margin-right: 10px;
+.create-session-section h2 {
+    display: none; /* Cache le titre "Nouvelle Séance" */
 }
 
 /* Style pour les blocs d'exercices planifiés */
@@ -265,6 +266,7 @@ h1, h2, h3, h4 {
     gap: 1rem; /* Espacement entre l'input et le bouton */
     margin-bottom: 1rem;
     position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
+    padding-right: 3rem; /* Ajouté: Pour laisser de la place au bouton à droite */
 }
 
 .exercise-header .exercise-name {
@@ -274,19 +276,19 @@ h1, h2, h3, h4 {
 }
 
 .exercise-header .remove-exercise-btn {
-    flex-shrink: 0; /* Empêche le bouton de rétrécir */
-    width: 38px; /* Taille fixe pour le bouton X */
-    height: 38px;
+    width: 32px; /* Réduire la taille */
+    height: 32px; /* Réduire la taille */
+    font-size: 1rem; /* Réduire la taille de la croix */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    padding: 0; /* Enlève le padding du bouton pour le centrage */
-    border-radius: 50%; /* Bouton rond */
-    position: absolute; /* Ajouté: Positionnement absolu */
-    top: -10px; /* Ajuster pour qu'il soit légèrement au-dessus du coin */
-    right: -10px; /* Ajuster pour qu'il soit légèrement à droite du coin */
-    box-shadow: var(--shadow-sm); /* Pour le faire ressortir un peu */
+    padding: 0;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; /* Centrer verticalement */
+    right: 8px; /* Positionner à droite, à l'intérieur du padding */
+    transform: translateY(-50%); /* Ajustement pour un centrage parfait */
+    box-shadow: var(--shadow-xs); /* Ombre plus subtile */
 }
 
 /* Rendre le champ de nombre de séries plus petit */
@@ -298,12 +300,11 @@ h1, h2, h3, h4 {
 
 /* Section "Mes Séances" */
 .view-sessions-section h2 {
-    /* margin-bottom: 1.5rem; */ /* Supprimé car le titre est retiré */
     display: none; /* Cache le titre de la page "Mes Séances" */
 }
 
 .view-sessions-section #filterToggleBtn {
-    margin-bottom: 1.5rem; /* Ajoute de l'espace sous le bouton */
+    margin-bottom: 0.5rem; /* Réduire légèrement pour le rapprocher des filtres */
 }
 
 /* Styles pour la section de filtre */
@@ -311,7 +312,7 @@ h1, h2, h3, h4 {
     background-color: var(--color-light);
     padding: 1rem; /* Réduire le padding général */
     border-radius: 8px;
-    margin-top: 1rem; /* Réduire la marge au-dessus */
+    margin-top: 0.5rem; /* Réduire cette marge pour le rapprocher du bouton toggle */
     margin-bottom: 1.5rem; /* Réduire la marge en dessous */
     box-shadow: var(--shadow-sm);
     display: flex; /* Utiliser flexbox */
@@ -469,6 +470,7 @@ h1, h2, h3, h4 {
     align-items: center;
     background-color: var(--color-background); /* Pour mieux les différencier */
     padding: 0.75rem;
+    padding-left: 3rem; /* Ajouté: Pour laisser de la place au bouton à gauche */
     border-radius: 5px;
     box-shadow: var(--shadow-xs);
     position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
@@ -476,8 +478,9 @@ h1, h2, h3, h4 {
 
 .series-row .series-label {
     font-weight: bold;
-    flex-basis: 100%; /* Prend toute la ligne sur mobile */
-    margin-bottom: 0.25rem; /* Espace entre label et inputs */
+    flex-shrink: 0; /* Empêche le label de rétrécir */
+    margin-right: 0.5rem; /* Espace entre le label et les inputs */
+    min-width: 60px; /* Pour une meilleure cohérence sur différentes tailles */
 }
 
 .series-row .form-group {
@@ -492,16 +495,19 @@ h1, h2, h3, h4 {
 }
 
 .series-row .remove-series-btn {
-    width: 32px; /* Plus petit */
-    height: 32px;
-    font-size: 0.9rem;
-    border-radius: 50%;
+    width: 28px; /* Réduire la taille */
+    height: 28px; /* Réduire la taille */
+    font-size: 0.8rem; /* Réduire la taille de la croix */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
-    margin-left: 0.5rem; /* Espace à gauche du bouton X */
-    position: absolute; /* Ajouté: Positionnement absolu */
-    top: -8px; /* Ajuster pour qu'il soit légèrement au-dessus du coin */
-    right: -8px; /* Ajuster pour qu'il soit légèrement à droite du coin */
-    box-shadow: var(--shadow-sm); /* Pour le faire ressortir un peu */
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; /* Centrer verticalement */
+    left: 8px; /* Positionner à gauche, à l'intérieur du padding */
+    transform: translateY(-50%); /* Ajustement pour un centrage parfait */
+    box-shadow: var(--shadow-xs); /* Ombre plus subtile */
 }
 
 .today-session-section .buttons-container.series-action-buttons {
@@ -617,11 +623,14 @@ h1, h2, h3, h4 {
         align-items: stretch;
         gap: 0.75rem;
         padding-top: 15px; /* Pour donner de la place au bouton X */
+        padding-right: 2.5rem; /* Ajuster pour mobile */
     }
 
     .exercise-header .remove-exercise-btn {
-        top: -5px; /* Ajuster pour mobile */
-        right: -5px; /* Ajuster pour mobile */
+        right: 5px; /* Ajuster pour mobile */
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
     }
 
     .exercise-block .num-series {
@@ -666,6 +675,7 @@ h1, h2, h3, h4 {
         padding: 0.5rem;
         margin-bottom: 0.5rem;
         padding-top: 15px; /* Pour donner de la place au bouton X */
+        padding-left: 2.5rem; /* Ajuster pour mobile */
     }
     .series-row .form-group {
         width: 100%;
@@ -673,10 +683,14 @@ h1, h2, h3, h4 {
     }
     .series-row .series-label {
         margin-bottom: 0.5rem;
+        flex-basis: auto; /* Laissez-le s'adapter mieux sur mobile */
+        margin-right: 0.5rem;
     }
     .series-row .remove-series-btn {
-        top: -5px; /* Ajuster pour mobile */
-        right: -5px; /* Ajuster pour mobile */
+        left: 5px; /* Ajuster pour mobile */
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
     }
     
     .today-session-section .buttons-container.series-action-buttons {
