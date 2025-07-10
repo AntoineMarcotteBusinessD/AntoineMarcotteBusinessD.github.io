@@ -28,9 +28,8 @@ function deleteSession(sessionId) {
     saveSessions(sessions);
 }
 
-// --- 2. Références DOM Globales ---
+// --- 2. Références DOM Globales (seulement le conteneur principal ici) ---
 const appContainer = document.getElementById('app-container');
-
 
 // --- 3. Fonctions de Vue ---
 
@@ -67,11 +66,13 @@ function showCreateSessionView() {
                 <h3>Exercices Planifiés</h3>
                 <div id="plannedExercisesContainer">
                     </div>
-                <button type="button" id="addExerciseBtn" class="btn small-btn">Ajouter un exercice planifié</button>
-                
-                <div class="form-group" style="margin-top: 2rem;">
-                    <button type="submit" class="btn">Générer la séance</button>
-                    <button type="button" id="cancelCreateSessionBtn" class="btn btn-danger">Annuler</button>
+                <div class="buttons-container create-session-buttons-top">
+                    <button type="button" id="addExerciseBtn" class="btn primary-btn large-btn">Ajouter un exercice planifié</button>
+                </div>
+
+                <hr class="section-divider"> <div class="buttons-container create-session-buttons-bottom">
+                    <button type="submit" class="btn success-btn large-btn">Générer la séance</button>
+                    <button type="button" id="cancelCreateSessionBtn" class="btn danger-btn large-btn">Annuler</button>
                 </div>
             </form>
         </section>
@@ -90,10 +91,10 @@ function showCreateSessionView() {
         const exerciseBlock = document.createElement('div');
         exerciseBlock.classList.add('exercise-block');
         exerciseBlock.innerHTML = `
-            <h3>
+            <div class="exercise-header">
                 <input type="text" class="form-control exercise-name" placeholder="Nom de l'exercice" required>
                 <button type="button" class="btn btn-danger small-btn remove-exercise-btn">X</button>
-            </h3>
+            </div>
             <div class="form-group">
                 <label for="numSeries-${exerciseCounter}">Nombre de séries planifiées :</label>
                 <input type="number" id="numSeries-${exerciseCounter}" class="form-control num-series" value="3" min="1" required>
@@ -169,45 +170,50 @@ function handleCreateSessionSubmit(event) {
 
 /**
  * Affiche la vue "Séance du Jour" (pour compléter une séance planifiée).
+ * Cette fonction est maintenant la version générique pour compléter une séance à une date donnée.
  */
-function showTodaySessionView() {
+function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
     // Masquer le bouton de filtre si jamais il était visible
     const filterToggleBtn = document.getElementById('filterToggleBtn');
     if (filterToggleBtn) filterToggleBtn.style.display = 'none';
 
-    const today = new Date().toISOString().split('T')[0]; // Date du jour au format YYYY-MM-DD
     const sessions = loadSessions();
-    const todaySession = sessions.find(session => session.date === today && session.status === 'planned');
+    const specificSession = sessions.find(session => session.date === date && session.status === 'planned');
 
-    if (todaySession) {
+    if (specificSession) {
         let exercisesHtml = '';
-        todaySession.exercises.forEach((exercise, exerciseIndex) => {
+        specificSession.exercises.forEach((exercise, exerciseIndex) => {
             exercisesHtml += `
                 <div class="exercise-block">
-                    <h3>
+                    <div class="exercise-header">
                         <span class="exercise-name-display">${exercise.name}</span>
-                        <button type="button" class="btn small-btn btn-primary add-series-btn" data-exercise-index="${exerciseIndex}">Ajouter une série</button>
-                    </h3>
+                    </div>
                     <div class="series-container" id="series-container-${exerciseIndex}">
                         </div>
+                    <div class="buttons-container series-action-buttons">
+                        <button type="button" class="btn primary-btn small-btn add-series-btn" data-exercise-index="${exerciseIndex}">Ajouter une série</button>
+                    </div>
                 </div>
             `;
         });
 
         appContainer.innerHTML = `
             <section class="today-session-section content-section">
-                <h2>Séance du Jour : ${todaySession.type} - ${new Date(todaySession.date).toLocaleDateString('fr-FR')}</h2>
+                <div class="session-completion-header">
+                    <h2>Séance du Jour : ${specificSession.type} - ${new Date(specificSession.date).toLocaleDateString('fr-FR')}</h2>
+                    <div class="buttons-container session-completion-buttons-header">
+                        <button type="submit" form="completeSessionForm" class="btn success-btn large-btn">Terminer et Enregistrer la séance</button>
+                        <button type="button" id="cancelTodaySessionBtn" class="btn danger-btn large-btn">Annuler la séance</button>
+                    </div>
+                </div>
+                
                 <form id="completeSessionForm">
                     ${exercisesHtml}
-                    <div class="form-group" style="margin-top: 2rem;">
-                        <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
-                        <button type="button" id="cancelTodaySessionBtn" class="btn btn-danger">Annuler la séance (ne pas enregistrer)</button>
-                    </div>
                 </form>
             </section>
         `;
 
-        todaySession.exercises.forEach((exercise, exerciseIndex) => {
+        specificSession.exercises.forEach((exercise, exerciseIndex) => {
             const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
             // Remplir les séries existantes
             exercise.series.forEach((seriesData, seriesIndex) => {
@@ -219,20 +225,20 @@ function showTodaySessionView() {
             button.addEventListener('click', (event) => {
                 const exerciseIndex = event.target.dataset.exerciseIndex;
                 const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
-                addSeriesRow(seriesContainer, exerciseIndex, todaySession.exercises[exerciseIndex].series.length, null, null, null);
+                addSeriesRow(seriesContainer, exerciseIndex, specificSession.exercises[exerciseIndex].series.length, null, null, null);
                 // Ajouter une série vide au modèle de données temporaire pour cohérence
-                todaySession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
+                specificSession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
             });
         });
 
         document.getElementById('completeSessionForm').addEventListener('submit', (event) => {
             event.preventDefault();
-            handleCompleteSessionSubmit(todaySession);
+            handleCompleteSessionSubmit(specificSession);
         });
 
         document.getElementById('cancelTodaySessionBtn').addEventListener('click', () => {
             if (confirm('Voulez-vous vraiment annuler cette séance planifiée ? Elle sera supprimée.')) {
-                deleteSession(todaySession.id);
+                deleteSession(specificSession.id);
                 showViewSessionsView(); // Retourne à la liste des séances
             }
         });
@@ -241,11 +247,11 @@ function showTodaySessionView() {
         appContainer.innerHTML = `
             <section class="today-session-section content-section">
                 <h2>Séance du Jour</h2>
-                <p class="no-sessions-message">Pas de séance planifiée pour aujourd'hui.</p>
+                <p class="no-sessions-message">Pas de séance planifiée pour aujourd'hui ou cette date.</p>
                 <p class="no-sessions-message">Cliquez sur "Nouvelle Séance" pour en créer une, ou "Mes Séances" pour voir l'historique.</p>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button type="button" class="btn" onclick="showCreateSessionView()">Nouvelle Séance</button>
-                    <button type="button" class="btn" onclick="showViewSessionsView()">Mes Séances</button>
+                <div class="buttons-container" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn primary-btn large-btn" onclick="showCreateSessionView()">Nouvelle Séance</button>
+                    <button type="button" class="btn large-btn" onclick="showViewSessionsView()">Mes Séances</button>
                 </div>
             </section>
         `;
@@ -266,13 +272,13 @@ function addSeriesRow(container, exerciseIndex, seriesIndex, reps = '', weight =
     seriesRow.classList.add('series-row');
     seriesRow.innerHTML = `
         <span class="series-label">Série ${seriesIndex + 1} :</span>
-        <div class="form-group" style="flex:1;">
+        <div class="form-group">
             <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0">
         </div>
-        <div class="form-group" style="flex:1;">
+        <div class="form-group">
             <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0">
         </div>
-        <div class="form-group" style="flex:1;">
+        <div class="form-group">
             <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${rest}" min="0">
         </div>
         <button type="button" class="btn btn-danger small-btn remove-series-btn">X</button>
@@ -347,8 +353,7 @@ function handleCompleteSessionSubmit(sessionToComplete) {
  */
 function showViewSessionsView() {
     // Afficher le bouton de filtre (il est masqué dans les autres vues)
-    const filterToggleBtnGlobal = document.getElementById('filterToggleBtn');
-    if (filterToggleBtnGlobal) filterToggleBtnGlobal.style.display = 'inline-block'; // Ou 'block' selon le besoin
+    // Note : filterToggleBtn n'est pas censé exister avant cette vue, donc pas besoin de le chercher globalement ici.
 
     appContainer.innerHTML = `
         <section class="view-sessions-section content-section">
@@ -390,7 +395,7 @@ function showViewSessionsView() {
     if (filterToggleBtn && filterControls) { // Vérification supplémentaire, par sécurité
         filterToggleBtn.addEventListener('click', () => {
             filterControls.classList.toggle('hidden');
-            filterToggleBtn.classList.toggle('active');
+            filterToggleBtn.classList.toggle('active'); // active n'est pas défini, à retirer ou définir dans CSS
             filterToggleBtn.textContent = filterControls.classList.contains('hidden') ? 'Afficher les Filtres' : 'Masquer les Filtres';
         });
     }
@@ -497,7 +502,7 @@ function displaySessions() {
                      // Si c'est une séance planifiée, rediriger vers la séance du jour pour la compléter
                     const sessionToComplete = loadSessions().find(s => s.id === sessionId);
                     if (sessionToComplete) {
-                        showTodaySessionViewForSpecificDate(sessionToComplete.date);
+                        showTodaySessionView(sessionToComplete.date); // Utilise la fonction générique
                     }
                 }
             }
@@ -595,92 +600,6 @@ function formatSessionDetails(session) {
         `;
     });
     return detailsHtml;
-}
-
-/**
- * Affiche la vue "Séance du Jour" pour une date spécifique, typiquement pour la complétion.
- * @param {string} date - La date de la séance à afficher (format YYYY-MM-DD).
- */
-function showTodaySessionViewForSpecificDate(date) {
-    // Masquer le bouton de filtre si jamais il était visible
-    const filterToggleBtn = document.getElementById('filterToggleBtn');
-    if (filterToggleBtn) filterToggleBtn.style.display = 'none';
-
-    const sessions = loadSessions();
-    const specificSession = sessions.find(session => session.date === date && session.status === 'planned');
-
-    if (specificSession) {
-        let exercisesHtml = '';
-        specificSession.exercises.forEach((exercise, exerciseIndex) => {
-            exercisesHtml += `
-                <div class="exercise-block">
-                    <h3>
-                        <span class="exercise-name-display">${exercise.name}</span>
-                        <button type="button" class="btn small-btn btn-primary add-series-btn" data-exercise-index="${exerciseIndex}">Ajouter une série</button>
-                    </h3>
-                    <div class="series-container" id="series-container-${exerciseIndex}">
-                        </div>
-                </div>
-            `;
-        });
-
-        appContainer.innerHTML = `
-            <section class="today-session-section content-section">
-                <h2>Séance du Jour : ${specificSession.type} - ${new Date(specificSession.date).toLocaleDateString('fr-FR')}</h2>
-                <form id="completeSessionForm">
-                    ${exercisesHtml}
-                    <div class="form-group" style="margin-top: 2rem;">
-                        <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
-                        <button type="button" id="cancelTodaySessionBtn" class="btn btn-danger">Annuler la séance (ne pas enregistrer)</button>
-                    </div>
-                </div>
-                </form>
-            </section>
-        `;
-
-        specificSession.exercises.forEach((exercise, exerciseIndex) => {
-            const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
-            // Remplir les séries existantes
-            exercise.series.forEach((seriesData, seriesIndex) => {
-                addSeriesRow(seriesContainer, exerciseIndex, seriesIndex, seriesData.reps, seriesData.weight, seriesData.rest);
-            });
-        });
-
-        document.querySelectorAll('.add-series-btn').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const exerciseIndex = event.target.dataset.exerciseIndex;
-                const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
-                addSeriesRow(seriesContainer, exerciseIndex, specificSession.exercises[exerciseIndex].series.length, null, null, null);
-                // Ajouter une série vide au modèle de données temporaire pour cohérence
-                specificSession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
-            });
-        });
-
-        document.getElementById('completeSessionForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            handleCompleteSessionSubmit(specificSession);
-        });
-
-        document.getElementById('cancelTodaySessionBtn').addEventListener('click', () => {
-            if (confirm('Voulez-vous vraiment annuler cette séance planifiée ? Elle sera supprimée.')) {
-                deleteSession(specificSession.id);
-                showViewSessionsView(); // Retourne à la liste des séances
-            }
-        });
-
-    } else {
-        appContainer.innerHTML = `
-            <section class="today-session-section content-section">
-                <h2>Séance du Jour</h2>
-                <p class="no-sessions-message">Pas de séance planifiée pour cette date, ou la séance a déjà été complétée.</p>
-                <p class="no-sessions-message">Cliquez sur "Nouvelle Séance" pour en créer une, ou "Mes Séances" pour voir l'historique.</p>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button type="button" class="btn" onclick="showCreateSessionView()">Nouvelle Séance</button>
-                    <button type="button" class="btn" onclick="showViewSessionsView()">Mes Séances</button>
-                </div>
-            </section>
-        `;
-    }
 }
 
 
