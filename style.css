@@ -62,9 +62,7 @@ h1, h2, h3, h4 {
 }
 
 .main-header h1 {
-    margin: 0;
-    font-size: 1.8rem; /* Légèrement réduire la taille du titre */
-    padding-bottom: 0.25rem; /* Réduire l'espace sous le titre */
+    display: none; /* Cache le titre de l'application pour gagner de la place */
 }
 
 .main-header nav {
@@ -596,8 +594,7 @@ h1, h2, h3, h4 {
     }
 
     .main-header h1 {
-        font-size: 1.5rem; /* Ajuster la taille du titre sur mobile */
-        padding-bottom: 0.2rem;
+        display: none; /* Cache le titre de l'application pour gagner de la place */
     }
 
     .main-header nav {
