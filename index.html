@@ -7,8 +7,26 @@
     <link rel="stylesheet" href="style.css">
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3498db"/> </head>
+    <meta name="theme-color" content="#3498db"/>
+</head>
 <body>
+    <header class="main-header">
+        <h1>Suivi de Séances Sportives</h1>
+        <nav>
+            <button id="addSessionBtn" class="btn nav-btn">Nouvelle Séance</button>
+            <button id="viewSessionsBtn" class="btn nav-btn">Mes Séances</button>
+            </nav>
+    </header>
+
+    <main>
+        <div id="app-container" class="container">
+            </div>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2025 Suivi de Séances Sportives. Tous droits réservés.</p>
+    </footer>
+
     <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
