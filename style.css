@@ -7,6 +7,7 @@
     --color-white: #ffffff;
     --color-light: #ecf0f1; /* Gris très clair */
     --color-grey: #bdc3c7; /* Gris moyen */
+    --color-grey-light: #dfe4e7; /* Gris encore plus clair pour séparateur */
     --color-grey-dark: #7f8c8d; /* Gris foncé */
     --color-dark: #2c3e50; /* Presque noir */
     --color-red: #e74c3c; /* Rouge (danger) */
@@ -82,11 +83,23 @@ h1, h2, h3, h4 {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .main-header .nav-btn:hover {
     background-color: var(--color-blue-dark);
+}
+
+.main-header .nav-btn.active-nav-btn {
+    background-color: var(--color-dark); /* Couleur différente pour le bouton actif */
+    color: var(--color-primary); /* Couleur du texte du bouton actif */
+    border: 1px solid var(--color-primary); /* Bordure pour le bouton actif */
+    font-weight: bold;
+}
+/* S'assurer que le hover sur l'actif est aussi distinct */
+.main-header .nav-btn.active-nav-btn:hover {
+    background-color: var(--color-dark); /* Garde la même couleur de fond */
+    color: var(--color-primary); /* Garde la même couleur de texte */
 }
 
 /* Footer */
@@ -251,6 +264,7 @@ h1, h2, h3, h4 {
     align-items: center; /* Alignement vertical */
     gap: 1rem; /* Espacement entre l'input et le bouton */
     margin-bottom: 1rem;
+    position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
 }
 
 .exercise-header .exercise-name {
@@ -269,6 +283,10 @@ h1, h2, h3, h4 {
     font-size: 1.1rem;
     padding: 0; /* Enlève le padding du bouton pour le centrage */
     border-radius: 50%; /* Bouton rond */
+    position: absolute; /* Ajouté: Positionnement absolu */
+    top: -10px; /* Ajuster pour qu'il soit légèrement au-dessus du coin */
+    right: -10px; /* Ajuster pour qu'il soit légèrement à droite du coin */
+    box-shadow: var(--shadow-sm); /* Pour le faire ressortir un peu */
 }
 
 /* Rendre le champ de nombre de séries plus petit */
@@ -280,20 +298,25 @@ h1, h2, h3, h4 {
 
 /* Section "Mes Séances" */
 .view-sessions-section h2 {
-    margin-bottom: 1.5rem;
+    /* margin-bottom: 1.5rem; */ /* Supprimé car le titre est retiré */
+    display: none; /* Cache le titre de la page "Mes Séances" */
+}
+
+.view-sessions-section #filterToggleBtn {
+    margin-bottom: 1.5rem; /* Ajoute de l'espace sous le bouton */
 }
 
 /* Styles pour la section de filtre */
 .filter-controls {
     background-color: var(--color-light);
-    padding: 1.5rem;
+    padding: 1rem; /* Réduire le padding général */
     border-radius: 8px;
-    margin-top: 1.5rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem; /* Réduire la marge au-dessus */
+    margin-bottom: 1.5rem; /* Réduire la marge en dessous */
     box-shadow: var(--shadow-sm);
     display: flex; /* Utiliser flexbox */
     flex-wrap: wrap; /* Permettre le passage à la ligne */
-    gap: 1rem; /* Espacement entre les éléments de filtre */
+    gap: 0.75rem; /* Réduire l'espacement entre les éléments de filtre */
     align-items: flex-end; /* Aligner les labels en haut et les inputs en bas */
     justify-content: space-between; /* Espacement entre les groupes de formulaires */
 }
@@ -304,21 +327,36 @@ h1, h2, h3, h4 {
 
 .filter-controls .form-group {
     flex: 1; /* Chaque groupe de formulaire prend de l'espace */
-    min-width: 180px; /* Largeur minimale pour éviter un trop grand rétrécissement */
+    min-width: 150px; /* Réduire la largeur minimale */
     display: flex;
     flex-direction: column; /* Label au-dessus de l'input */
+    margin-bottom: 0.5rem; /* Réduire l'espacement entre les groupes sur petits écrans */
 }
+
+.filter-controls label {
+    font-size: 0.9rem; /* Réduire la taille de la police du label */
+    margin-bottom: 0.3rem; /* Réduire la marge sous le label */
+}
+
+.filter-controls .form-control {
+    padding: 0.6rem; /* Réduire le padding des inputs/selects */
+    font-size: 0.9rem; /* Réduire la taille de la police des inputs/selects */
+}
+
 
 /* Le bouton "Réinitialiser filtres" */
 #resetFiltersBtn {
-    margin-top: 1.5rem; /* Pour l'aligner si les inputs passent à la ligne */
+    margin-top: 1rem; /* Réduire la marge au-dessus du bouton de réinitialisation */
     align-self: flex-end; /* Pour l'aligner en bas avec les inputs */
+    padding: 0.5rem 1rem; /* Ajuster le padding du bouton */
+    font-size: 0.85rem; /* Ajuster la taille de la police du bouton */
 }
 
 .sessions-list {
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+    margin-top: 0; /* Assurez-vous qu'il n'y a pas de marge excessive ici */
 }
 
 .session-card {
@@ -433,6 +471,7 @@ h1, h2, h3, h4 {
     padding: 0.75rem;
     border-radius: 5px;
     box-shadow: var(--shadow-xs);
+    position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
 }
 
 .series-row .series-label {
@@ -459,6 +498,10 @@ h1, h2, h3, h4 {
     border-radius: 50%;
     padding: 0;
     margin-left: 0.5rem; /* Espace à gauche du bouton X */
+    position: absolute; /* Ajouté: Positionnement absolu */
+    top: -8px; /* Ajuster pour qu'il soit légèrement au-dessus du coin */
+    right: -8px; /* Ajuster pour qu'il soit légèrement à droite du coin */
+    box-shadow: var(--shadow-sm); /* Pour le faire ressortir un peu */
 }
 
 .today-session-section .buttons-container.series-action-buttons {
@@ -573,12 +616,12 @@ h1, h2, h3, h4 {
         flex-direction: column; /* Empile l'input et le bouton sur mobile */
         align-items: stretch;
         gap: 0.75rem;
+        padding-top: 15px; /* Pour donner de la place au bouton X */
     }
 
     .exercise-header .remove-exercise-btn {
-        align-self: flex-end; /* Le bouton X se positionne à droite */
-        margin-top: -45px; /* Remonte le bouton X */
-        margin-right: -5px; /* Déborde légèrement sur la droite */
+        top: -5px; /* Ajuster pour mobile */
+        right: -5px; /* Ajuster pour mobile */
     }
 
     .exercise-block .num-series {
@@ -589,15 +632,17 @@ h1, h2, h3, h4 {
     .filter-controls {
         flex-direction: column; /* Les filtres s'empilent sur mobile */
         align-items: stretch; /* Les éléments s'étirent sur toute la largeur */
-        padding: 1rem;
+        padding: 0.75rem; /* Encore plus petit sur très petits écrans */
+        gap: 0.5rem;
     }
     .filter-controls .form-group {
         min-width: unset; /* Pas de largeur minimale sur mobile */
         width: 100%; /* Prend toute la largeur */
+        margin-bottom: 0.5rem;
     }
     #resetFiltersBtn {
         width: 100%; /* Prend toute la largeur sur mobile */
-        margin-top: 1rem; /* Ajuster la marge */
+        margin-top: 0.75rem; /* Ajuster la marge */
     }
 
     /* Cartes de séance */
@@ -620,6 +665,7 @@ h1, h2, h3, h4 {
         align-items: flex-start;
         padding: 0.5rem;
         margin-bottom: 0.5rem;
+        padding-top: 15px; /* Pour donner de la place au bouton X */
     }
     .series-row .form-group {
         width: 100%;
@@ -629,9 +675,8 @@ h1, h2, h3, h4 {
         margin-bottom: 0.5rem;
     }
     .series-row .remove-series-btn {
-        align-self: flex-end; /* Aligner le bouton X à droite en mode empilé */
-        margin-top: -30px; /* Remonte le bouton X */
-        margin-right: -5px; /* Déborde légèrement sur la droite */
+        top: -5px; /* Ajuster pour mobile */
+        right: -5px; /* Ajuster pour mobile */
     }
     
     .today-session-section .buttons-container.series-action-buttons {

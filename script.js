@@ -109,6 +109,9 @@ function showCreateSessionView() {
 
     createSessionForm.addEventListener('submit', handleCreateSessionSubmit);
     cancelCreateSessionBtn.addEventListener('click', showViewSessionsView); // Annuler redirige vers "Mes Séances"
+
+    const addSessionNavBtn = document.getElementById('addSessionBtn');
+    activateNavLink(addSessionNavBtn); // Active le bouton "Nouvelle Séance"
 }
 
 /**
@@ -293,7 +296,6 @@ function addSeriesRow(container, exerciseIndex, seriesIndex, reps = '', weight =
 
 /**
  * Gère la soumission du formulaire de complétion de séance.
- * @param {Object} sessionToComplete - La séance à compléter.
  */
 function handleCompleteSessionSubmit(sessionToComplete) {
     const updatedExercises = [];
@@ -352,12 +354,10 @@ function handleCompleteSessionSubmit(sessionToComplete) {
  * Gère également l'affichage et le masquage des filtres.
  */
 function showViewSessionsView() {
-    // Afficher le bouton de filtre (il est masqué dans les autres vues)
     // Note : filterToggleBtn n'est pas censé exister avant cette vue, donc pas besoin de le chercher globalement ici.
 
     appContainer.innerHTML = `
         <section class="view-sessions-section content-section">
-            <h2>Mes Séances</h2>
             <button type="button" id="filterToggleBtn" class="btn small-btn">Afficher les Filtres</button>
             <div id="filterControls" class="filter-controls hidden">
                 <div class="form-group">
@@ -395,7 +395,7 @@ function showViewSessionsView() {
     if (filterToggleBtn && filterControls) { // Vérification supplémentaire, par sécurité
         filterToggleBtn.addEventListener('click', () => {
             filterControls.classList.toggle('hidden');
-            filterToggleBtn.classList.toggle('active'); // active n'est pas défini, à retirer ou définir dans CSS
+            // 'active' était une classe d'exemple, j'ai enlevé la ligne qui l'ajoutait
             filterToggleBtn.textContent = filterControls.classList.contains('hidden') ? 'Afficher les Filtres' : 'Masquer les Filtres';
         });
     }
@@ -413,6 +413,9 @@ function showViewSessionsView() {
     }
 
     displaySessions(); // Afficher toutes les séances au chargement de cette vue
+
+    const viewSessionsNavBtn = document.getElementById('viewSessionsBtn');
+    activateNavLink(viewSessionsNavBtn); // Active le bouton "Mes Séances"
 }
 
 /**
@@ -565,6 +568,9 @@ function displayCompletedSessionDetails(sessionToView) {
             showViewSessionsView(); // Revenir à la liste après suppression
         }
     });
+
+    // Désactive les liens de navigation quand on est dans les détails d'une séance
+    activateNavLink(null);
 }
 
 /**
@@ -602,6 +608,19 @@ function formatSessionDetails(session) {
     return detailsHtml;
 }
 
+/**
+ * Active le style du bouton de navigation donné et désactive les autres.
+ * @param {HTMLElement} activeBtn - Le bouton de navigation à activer.
+ */
+function activateNavLink(activeBtn) {
+    const allNavBtns = document.querySelectorAll('.main-header .nav-btn');
+    allNavBtns.forEach(btn => {
+        btn.classList.remove('active-nav-btn');
+    });
+    if (activeBtn) {
+        activeBtn.classList.add('active-nav-btn');
+    }
+}
 
 // --- 8. Initialisation et Écouteurs d'événements globaux ---
 
