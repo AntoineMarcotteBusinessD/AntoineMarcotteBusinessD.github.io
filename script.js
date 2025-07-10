@@ -1,15 +1,42 @@
 // script.js
 
-// --- 1. Références aux éléments du DOM ---
+// --- 1. Gestion du LocalStorage ---
+/**
+ * Charge les séances depuis le LocalStorage.
+ * @returns {Array} Un tableau des séances enregistrées.
+ */
+function loadSessions() {
+    const sessionsJSON = localStorage.getItem('gymSessions');
+    return sessionsJSON ? JSON.parse(sessionsJSON) : [];
+}
+
+/**
+ * Sauvegarde les séances dans le LocalStorage.
+ * @param {Array} sessions - Le tableau des séances à sauvegarder.
+ */
+function saveSessions(sessions) {
+    localStorage.setItem('gymSessions', JSON.stringify(sessions));
+}
+
+/**
+ * Supprime une séance spécifique du LocalStorage par son ID.
+ * @param {string} sessionId - L'ID de la séance à supprimer.
+ */
+function deleteSession(sessionId) {
+    let sessions = loadSessions();
+    sessions = sessions.filter(session => session.id !== sessionId);
+    saveSessions(sessions);
+}
+
+// --- 2. Références DOM Globales ---
 const appContainer = document.getElementById('app-container');
 const addSessionBtn = document.getElementById('addSessionBtn');
 const viewSessionsBtn = document.getElementById('viewSessionsBtn');
-// filterToggleBtn ne sera plus une référence globale car créé dans la fonction showViewSessionsView
 
-// --- 2. Fonctions d'affichage des vues ---
+// --- 3. Fonctions de Vue ---
 
 /**
- * Affiche la vue pour créer (planifier) une nouvelle séance d'entraînement.
+ * Affiche la vue pour créer une nouvelle séance.
  */
 function showCreateSessionView() {
     // Masquer le bouton de filtre si jamais il était visible
@@ -18,315 +45,477 @@ function showCreateSessionView() {
 
     appContainer.innerHTML = `
         <section class="create-session-section content-section">
-            <h2>Planifier une nouvelle séance</h2>
+            <h2>Nouvelle Séance</h2>
             <form id="createSessionForm">
                 <div class="form-group">
-                    <label for="createSessionDate">Date de la séance :</label>
-                    <input type="date" id="createSessionDate" class="form-control" required>
+                    <label for="sessionDate">Date :</label>
+                    <input type="date" id="sessionDate" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="createSessionType">Type de séance :</label>
-                    <select id="createSessionType" class="form-control" required>
+                    <label for="sessionType">Type de séance :</label>
+                    <select id="sessionType" class="form-control" required>
                         <option value="">Sélectionnez un type</option>
                         <option value="Jambes">Jambes</option>
                         <option value="Dos Biceps">Dos Biceps</option>
-                        <option value="Dos Triceps">Dos Triceps</option>
-                        <option value="Pec Biceps">Pec Biceps</option>
-                        <option value="Pec Triceps">Pec Triceps</option>
-                        <option value="Epaule Bras">Epaule Bras</option>
-                        <option value="Bras">Bras</option>
+                        <option value="Pectoraux Triceps">Pectoraux Triceps</option>
+                        <option value="Épaules">Épaules</option>
+                        <option value="Cardio">Cardio</option>
+                        <option value="Full Body">Full Body</option>
+                        <option value="Autre">Autre</option>
                     </select>
                 </div>
 
+                <h3>Exercices Planifiés</h3>
                 <div id="plannedExercisesContainer">
-                    <p class="no-exercises-message">Ajoutez les exercices que vous prévoyez de faire.</p>
+                    </div>
+                <button type="button" id="addExerciseBtn" class="btn small-btn">Ajouter un exercice planifié</button>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <button type="submit" class="btn">Générer la séance</button>
+                    <button type="button" id="cancelCreateSessionBtn" class="btn btn-danger">Annuler</button>
                 </div>
-
-                <button type="button" id="addPlannedExerciseBtn" class="btn">Ajouter un exercice planifié</button>
-                <button type="submit" class="btn">Générer la séance</button>
             </form>
         </section>
     `;
 
+    document.getElementById('sessionDate').valueAsDate = new Date(); // Date du jour par défaut
+
+    let exerciseCounter = 0; // Pour générer des IDs uniques pour les exercices
+    const addExerciseBtn = document.getElementById('addExerciseBtn');
+    const plannedExercisesContainer = document.getElementById('plannedExercisesContainer');
     const createSessionForm = document.getElementById('createSessionForm');
-    const addPlannedExerciseBtn = document.getElementById('addPlannedExerciseBtn');
+    const cancelCreateSessionBtn = document.getElementById('cancelCreateSessionBtn');
 
-    // Initialiser la date à aujourd'hui par défaut
-    document.getElementById('createSessionDate').valueAsDate = new Date();
+    addExerciseBtn.addEventListener('click', () => {
+        exerciseCounter++;
+        const exerciseBlock = document.createElement('div');
+        exerciseBlock.classList.add('exercise-block');
+        exerciseBlock.innerHTML = `
+            <h3>
+                <input type="text" class="form-control exercise-name" placeholder="Nom de l'exercice" required>
+                <button type="button" class="btn btn-danger small-btn remove-exercise-btn">X</button>
+            </h3>
+            <div class="form-group">
+                <label for="numSeries-${exerciseCounter}">Nombre de séries planifiées :</label>
+                <input type="number" id="numSeries-${exerciseCounter}" class="form-control num-series" value="3" min="1" required>
+            </div>
+        `;
+        plannedExercisesContainer.appendChild(exerciseBlock);
 
-    addPlannedExerciseBtn.addEventListener('click', addPlannedExerciseToForm);
+        exerciseBlock.querySelector('.remove-exercise-btn').addEventListener('click', () => {
+            plannedExercisesContainer.removeChild(exerciseBlock);
+        });
+    });
+
     createSessionForm.addEventListener('submit', handleCreateSessionSubmit);
+    cancelCreateSessionBtn.addEventListener('click', showViewSessionsView); // Annuler redirige vers "Mes Séances"
 }
 
 /**
- * Affiche la vue "Séance du jour" où l'utilisateur complète les performances.
- * Si une séance planifiée existe pour aujourd'hui, elle est chargée.
+ * Gère la soumission du formulaire de création de séance.
+ */
+function handleCreateSessionSubmit(event) {
+    event.preventDefault();
+
+    const sessionDate = document.getElementById('sessionDate').value;
+    const sessionType = document.getElementById('sessionType').value;
+    const exerciseElements = document.querySelectorAll('.exercise-block');
+
+    const exercises = [];
+    exerciseElements.forEach(block => {
+        const name = block.querySelector('.exercise-name').value.trim();
+        const numSeries = parseInt(block.querySelector('.num-series').value);
+
+        if (name && numSeries > 0) {
+            const series = Array.from({ length: numSeries }, () => ({
+                reps: null, // Initialiser à null pour indiquer non renseigné
+                weight: null,
+                rest: null
+            }));
+            exercises.push({ name, series });
+        }
+    });
+
+    if (exercises.length === 0) {
+        alert('Veuillez ajouter au moins un exercice planifié.');
+        return;
+    }
+
+    let sessions = loadSessions();
+    const existingSessionIndex = sessions.findIndex(s => s.date === sessionDate && s.status === 'planned');
+
+    const newSession = {
+        id: 'session_' + Date.now(), // ID unique
+        date: sessionDate,
+        type: sessionType,
+        exercises: exercises,
+        status: 'planned'
+    };
+
+    if (existingSessionIndex !== -1) {
+        if (confirm(`Une séance planifiée existe déjà pour le ${new Date(sessionDate).toLocaleDateString('fr-FR')}. Voulez-vous la remplacer ?`)) {
+            sessions[existingSessionIndex] = newSession;
+        } else {
+            return; // L'utilisateur a annulé le remplacement
+        }
+    } else {
+        sessions.push(newSession);
+    }
+
+    saveSessions(sessions);
+    alert('Séance planifiée avec succès !');
+    showViewSessionsView(); // Retourne à la vue des séances après la création
+}
+
+
+/**
+ * Affiche la vue "Séance du Jour" (pour compléter une séance planifiée).
  */
 function showTodaySessionView() {
     // Masquer le bouton de filtre si jamais il était visible
     const filterToggleBtn = document.getElementById('filterToggleBtn');
     if (filterToggleBtn) filterToggleBtn.style.display = 'none';
 
-    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0]; // Date du jour au format YYYY-MM-DD
     const sessions = loadSessions();
-    // Cherche une séance planifiée pour aujourd'hui qui n'est pas encore complétée
-    const todayPlannedSession = sessions.find(s => s.date === today && s.status === 'planned');
+    const todaySession = sessions.find(session => session.date === today && session.status === 'planned');
 
-    if (todayPlannedSession) {
+    if (todaySession) {
+        let exercisesHtml = '';
+        todaySession.exercises.forEach((exercise, exerciseIndex) => {
+            exercisesHtml += `
+                <div class="exercise-block">
+                    <h3>
+                        <span class="exercise-name-display">${exercise.name}</span>
+                        <button type="button" class="btn small-btn btn-primary add-series-btn" data-exercise-index="${exerciseIndex}">Ajouter une série</button>
+                    </h3>
+                    <div class="series-container" id="series-container-${exerciseIndex}">
+                        </div>
+                </div>
+            `;
+        });
+
         appContainer.innerHTML = `
             <section class="today-session-section content-section">
-                <h2>Séance du jour : ${todayPlannedSession.type} - ${new Date(todayPlannedSession.date).toLocaleDateString('fr-FR')}</h2>
+                <h2>Séance du Jour : ${todaySession.type} - ${new Date(todaySession.date).toLocaleDateString('fr-FR')}</h2>
                 <form id="completeSessionForm">
-                    <input type="hidden" id="sessionId" value="${todayPlannedSession.id}">
-                    <div id="completedExercisesContainer">
-                        ${formatPlannedExercisesForCompletion(todayPlannedSession.exercises)}
+                    ${exercisesHtml}
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
+                        <button type="button" id="cancelTodaySessionBtn" class="btn btn-danger">Annuler la séance (ne pas enregistrer)</button>
                     </div>
-                    <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
                 </form>
-                <button type="button" id="cancelSessionBtn" class="btn btn-danger">Annuler la séance (ne pas enregistrer)</button>
             </section>
         `;
-        // Attacher les écouteurs d'événements pour les boutons d'ajout/suppression de série après l'injection
-        document.querySelectorAll('.exercise-block .add-series-btn').forEach(btn => {
-            btn.addEventListener('click', (event) => {
-                const seriesContainer = event.target.closest('.exercise-block').querySelector('.series-container');
-                addSeriesToExercise(seriesContainer);
+
+        todaySession.exercises.forEach((exercise, exerciseIndex) => {
+            const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
+            // Remplir les séries existantes
+            exercise.series.forEach((seriesData, seriesIndex) => {
+                addSeriesRow(seriesContainer, exerciseIndex, seriesIndex, seriesData.reps, seriesData.weight, seriesData.rest);
             });
         });
-        document.querySelectorAll('.exercise-block .remove-series-btn').forEach(btn => {
-            btn.addEventListener('click', (event) => event.target.closest('.series-row').remove());
+
+        document.querySelectorAll('.add-series-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const exerciseIndex = event.target.dataset.exerciseIndex;
+                const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
+                addSeriesRow(seriesContainer, exerciseIndex, todaySession.exercises[exerciseIndex].series.length, null, null, null);
+                // Ajouter une série vide au modèle de données temporaire pour cohérence
+                todaySession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
+            });
         });
-        document.getElementById('completeSessionForm').addEventListener('submit', handleCompleteSessionSubmit);
-        document.getElementById('cancelSessionBtn').addEventListener('click', () => {
-            if (confirm("Êtes-vous sûr de vouloir annuler cette séance ? Toutes les données saisies seront perdues.")) {
-                deleteSession(todayPlannedSession.id); // Supprime la séance planifiée
-                showTodaySessionView(); // Revient à la vue "pas de séance"
+
+        document.getElementById('completeSessionForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            handleCompleteSessionSubmit(todaySession);
+        });
+
+        document.getElementById('cancelTodaySessionBtn').addEventListener('click', () => {
+            if (confirm('Voulez-vous vraiment annuler cette séance planifiée ? Elle sera supprimée.')) {
+                deleteSession(todaySession.id);
+                showViewSessionsView(); // Retourne à la liste des séances
             }
         });
 
     } else {
         appContainer.innerHTML = `
             <section class="today-session-section content-section">
-                <h2>Séance du jour</h2>
+                <h2>Séance du Jour</h2>
                 <p class="no-sessions-message">Pas de séance planifiée pour aujourd'hui.</p>
-                <p class="no-sessions-message">Cliquez sur "Nouvelle Séance" pour en créer une.</p>
-                <p class="no-sessions-message">Ou <button id="quickViewAllSessionsBtn" class="btn small-btn">consultez toutes vos séances</button>.</p>
+                <p class="no-sessions-message">Cliquez sur "Nouvelle Séance" pour en créer une, ou "Mes Séances" pour voir l'historique.</p>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn" onclick="showCreateSessionView()">Nouvelle Séance</button>
+                    <button type="button" class="btn" onclick="showViewSessionsView()">Mes Séances</button>
+                </div>
             </section>
         `;
-        document.getElementById('quickViewAllSessionsBtn').addEventListener('click', showViewSessionsView);
+    }
+}
+
+/**
+ * Ajoute une ligne de série à un bloc d'exercice.
+ * @param {HTMLElement} container - Le conteneur des séries.
+ * @param {number} exerciseIndex - L'index de l'exercice parent.
+ * @param {number} seriesIndex - L'index de la série à ajouter.
+ * @param {number} [reps=''] - Nombre de répétitions (pré-rempli si existant).
+ * @param {number} [weight=''] - Poids (pré-rempli si existant).
+ * @param {number} [rest=''] - Temps de repos (pré-rempli si existant).
+ */
+function addSeriesRow(container, exerciseIndex, seriesIndex, reps = '', weight = '', rest = '') {
+    const seriesRow = document.createElement('div');
+    seriesRow.classList.add('series-row');
+    seriesRow.innerHTML = `
+        <span class="series-label">Série ${seriesIndex + 1} :</span>
+        <div class="form-group" style="flex:1;">
+            <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0">
+        </div>
+        <div class="form-group" style="flex:1;">
+            <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0">
+        </div>
+        <div class="form-group" style="flex:1;">
+            <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${rest}" min="0">
+        </div>
+        <button type="button" class="btn btn-danger small-btn remove-series-btn">X</button>
+    `;
+    container.appendChild(seriesRow);
+
+    seriesRow.querySelector('.remove-series-btn').addEventListener('click', () => {
+        container.removeChild(seriesRow);
+    });
+}
+
+
+/**
+ * Gère la soumission du formulaire de complétion de séance.
+ * @param {Object} sessionToComplete - La séance à compléter.
+ */
+function handleCompleteSessionSubmit(sessionToComplete) {
+    const updatedExercises = [];
+    let allFieldsValid = true;
+
+    document.querySelectorAll('.exercise-block').forEach((exerciseBlock, exerciseIndex) => {
+        const exerciseName = exerciseBlock.querySelector('.exercise-name-display').textContent;
+        const seriesData = [];
+
+        exerciseBlock.querySelectorAll('.series-row').forEach((seriesRow, seriesIndex) => {
+            const repsInput = seriesRow.querySelector('.series-reps');
+            const weightInput = seriesRow.querySelector('.series-weight');
+            const restInput = seriesRow.querySelector('.series-rest');
+
+            const reps = repsInput.value.trim() !== '' ? parseInt(repsInput.value) : null;
+            const weight = weightInput.value.trim() !== '' ? parseFloat(weightInput.value) : null;
+            const rest = restInput.value.trim() !== '' ? parseInt(restInput.value) : null;
+
+            if (reps === null || weight === null || rest === null) {
+                allFieldsValid = false;
+                // Vous pouvez ajouter un feedback visuel ici, par ex. border-color: red
+                repsInput.style.borderColor = reps === null ? 'red' : '';
+                weightInput.style.borderColor = weight === null ? 'red' : '';
+                restInput.style.borderColor = rest === null ? 'red' : '';
+            } else {
+                repsInput.style.borderColor = '';
+                weightInput.style.borderColor = '';
+                restInput.style.borderColor = '';
+            }
+
+            seriesData.push({ reps, weight, rest });
+        });
+        updatedExercises.push({ name: exerciseName, series: seriesData });
+    });
+
+    if (!allFieldsValid) {
+        alert('Veuillez remplir toutes les informations (répétitions, poids, repos) pour chaque série.');
+        return;
+    }
+
+    // Mettre à jour la séance dans le tableau des séances
+    let sessions = loadSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionToComplete.id);
+    if (sessionIndex !== -1) {
+        sessions[sessionIndex].exercises = updatedExercises;
+        sessions[sessionIndex].status = 'completed'; // Marquer comme complétée
+        saveSessions(sessions);
+        alert('Séance enregistrée avec succès !');
+        showViewSessionsView(); // Retourne à la vue des séances
     }
 }
 
 
 /**
- * Affiche la vue pour consulter toutes les séances enregistrées (planifiées ou complétées).
+ * Affiche la vue "Mes Séances" avec la liste des séances.
+ * Gère également l'affichage et le masquage des filtres.
  */
 function showViewSessionsView() {
-    // Masquer l'ancien bouton de filtre du header s'il existe
-    const oldFilterToggleBtn = document.getElementById('filterToggleBtn');
-    if (oldFilterToggleBtn) oldFilterToggleBtn.style.display = 'none';
+    // Afficher le bouton de filtre (il est masqué dans les autres vues)
+    const filterToggleBtnGlobal = document.getElementById('filterToggleBtn');
+    if (filterToggleBtnGlobal) filterToggleBtnGlobal.style.display = 'inline-block'; // Ou 'block' selon le besoin
 
-    const sessions = loadSessions();
-    // Trie par date décroissante, puis par statut (planned avant completed pour les mêmes dates)
-    sessions.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        if (dateA.getTime() !== dateB.getTime()) {
-            return dateB - dateA; // Trie par date
-        }
-        // Si même date, met les planifiées avant les complétées
-        if (a.status === 'planned' && b.status === 'completed') return -1;
-        if (a.status === 'completed' && b.status === 'planned') return 1;
-        return 0; // Pas de changement d'ordre si même statut
-    });
-
-    if (sessions.length === 0) {
-        appContainer.innerHTML = `
-            <section class="view-sessions-section content-section">
-                <h2>Mes Séances</h2>
-                <p class="no-sessions-message">Vous n'avez pas encore enregistré de séances. Cliquez sur "Nouvelle Séance" pour commencer !</p>
-            </section>
-        `;
-        return;
-    }
-
-    let sessionsHtml = `
+    appContainer.innerHTML = `
         <section class="view-sessions-section content-section">
             <h2>Mes Séances</h2>
-            <button id="filterToggleBtn" class="btn">Afficher les Filtres</button> <div id="filterControls" class="filter-controls hidden">
-                <label for="filterDate">Filtrer par date :</label>
-                <input type="date" id="filterDate" class="form-control">
-                <label for="filterType">Filtrer par type :</label>
-                <input type="text" id="filterType" class="form-control" placeholder="Ex: Jambes">
-                <label for="filterStatus">Statut :</label>
-                <select id="filterStatus" class="form-control">
-                    <option value="">Tous</option>
-                    <option value="planned">Planifiée</option>
-                    <option value="completed">Complétée</option>
-                </select>
-                <button id="resetFiltersBtn" class="btn">Réinitialiser filtres</button>
+            <button type="button" id="filterToggleBtn" class="btn small-btn">Afficher les Filtres</button>
+            <div id="filterControls" class="filter-controls hidden">
+                <div class="form-group">
+                    <label for="filterDate">Date :</label>
+                    <input type="date" id="filterDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="filterType">Type de séance :</label>
+                    <input type="text" id="filterType" class="form-control" placeholder="Ex: Jambes">
+                </div>
+                <div class="form-group">
+                    <label for="filterStatus">Statut :</label>
+                    <select id="filterStatus" class="form-control">
+                        <option value="all">Tous</option>
+                        <option value="completed">Complétée</option>
+                        <option value="planned">Planifiée</option>
+                    </select>
+                </div>
+                <button type="button" id="resetFiltersBtn" class="btn small-btn">Réinitialiser filtres</button>
             </div>
-            <div id="sessionsListContainer">
+            <div id="sessionsList" class="sessions-list">
                 </div>
         </section>
     `;
-    appContainer.innerHTML = sessionsHtml;
 
-    // Références DOM après injection
-    const sessionsListContainer = document.getElementById('sessionsListContainer');
-    const filterControlsDiv = document.getElementById('filterControls');
-    const filterToggleBtn = document.getElementById('filterToggleBtn'); // Référence au nouveau bouton
+    // Récupérer les éléments APRÈS qu'ils aient été ajoutés au DOM
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterControls = document.getElementById('filterControls');
     const filterDateInput = document.getElementById('filterDate');
     const filterTypeInput = document.getElementById('filterType');
     const filterStatusSelect = document.getElementById('filterStatus');
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
 
-    // Écouteur pour le bouton de bascule des filtres
-    filterToggleBtn.onclick = () => {
-        filterControlsDiv.classList.toggle('hidden');
-        filterToggleBtn.classList.toggle('active');
-        filterToggleBtn.textContent = filterControlsDiv.classList.contains('hidden') ? 'Afficher les Filtres' : 'Masquer les Filtres';
-    };
-
-
-    // Fonction pour rendre les séances (sera appelée au chargement et lors des filtres)
-    const renderSessions = () => {
-        let filteredSessions = [...sessions]; // Copie pour ne pas modifier l'original
-
-        const filterDate = filterDateInput.value;
-        const filterType = filterTypeInput.value.toLowerCase().trim();
-        const filterStatus = filterStatusSelect.value;
-
-        if (filterDate) {
-            filteredSessions = filteredSessions.filter(session => session.date === filterDate);
-        }
-        if (filterType) {
-            filteredSessions = filteredSessions.filter(session => session.type.toLowerCase().includes(filterType));
-        }
-        if (filterStatus) {
-            filteredSessions = filteredSessions.filter(session => session.status === filterStatus);
-        }
-
-        if (filteredSessions.length === 0) {
-            sessionsListContainer.innerHTML = `<p class="no-results-message">Aucune séance trouvée avec les filtres actuels.</p>`;
-            return;
-        }
-
-        let listHtml = '';
-        filteredSessions.forEach((session) => {
-            const statusClass = session.status === 'completed' ? 'session-completed' : 'session-planned';
-            const statusText = session.status === 'completed' ? 'Complétée' : 'Planifiée';
-            // Utilisation d'un data attribute pour le statut pour faciliter la logique de clic
-            const clickAction = session.status === 'planned' ? 'start' : 'view';
-
-            listHtml += `
-                <div class="session-card ${statusClass}" data-session-id="${session.id}" data-click-action="${clickAction}">
-                    <div class="session-card-header">
-                        <div class="session-card-content">
-                            <h3>${session.type} - ${new Date(session.date).toLocaleDateString('fr-FR')} <span class="session-status">(${statusText})</span></h3>
-                            <p class="session-card-description">
-                                ${session.exercises.length} exercices
-                                ${session.status === 'planned' ? ' - Cliquez pour commencer !' : ''}
-                            </p>
-                        </div>
-                        <button class="delete-session-btn" data-session-id="${session.id}" title="Supprimer la séance">
-                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    </div>
-            `;
+    // Ajouter les écouteurs d'événements pour les filtres
+    if (filterToggleBtn && filterControls) { // Vérification supplémentaire, par sécurité
+        filterToggleBtn.addEventListener('click', () => {
+            filterControls.classList.toggle('hidden');
+            filterToggleBtn.classList.toggle('active');
+            filterToggleBtn.textContent = filterControls.classList.contains('hidden') ? 'Afficher les Filtres' : 'Masquer les Filtres';
         });
-        sessionsListContainer.innerHTML = listHtml;
+    }
 
-        // Gérer le clic sur la carte entière
-        document.querySelectorAll('.session-card').forEach(card => {
-            card.addEventListener('click', (event) => {
-                // S'assurer que le clic n'est pas sur le bouton de suppression
-                if (event.target.closest('.delete-session-btn')) {
-                    return;
-                }
-
-                const sessionId = card.dataset.sessionId;
-                const clickAction = card.dataset.clickAction;
-                const session = sessions.find(s => s.id === sessionId);
-
-                if (session) {
-                    if (clickAction === 'start') {
-                        displaySessionForCompletion(session);
-                    } else if (clickAction === 'view') {
-                        // Affiche la nouvelle vue détaillée pour les séances complétées
-                        displayCompletedSessionDetails(session);
-                    }
-                }
-            });
+    if (filterDateInput) filterDateInput.addEventListener('change', displaySessions);
+    if (filterTypeInput) filterTypeInput.addEventListener('input', displaySessions);
+    if (filterStatusSelect) filterStatusSelect.addEventListener('change', displaySessions);
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            filterDateInput.value = '';
+            filterTypeInput.value = '';
+            filterStatusSelect.value = 'all';
+            displaySessions(); // Réafficher avec les filtres réinitialisés
         });
+    }
 
-        document.querySelectorAll('.delete-session-btn').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const sessionId = event.target.closest('.delete-session-btn').dataset.sessionId;
-                if (confirm(`Êtes-vous sûr de vouloir supprimer cette séance ?`)) {
-                    deleteSession(sessionId);
-                    showViewSessionsView(); // Rafraîchit la vue
-                }
-            });
-        });
-    };
-
-    // Écouteurs pour les filtres
-    filterDateInput.addEventListener('change', renderSessions);
-    filterTypeInput.addEventListener('input', renderSessions);
-    filterStatusSelect.addEventListener('change', renderSessions);
-    resetFiltersBtn.addEventListener('click', () => {
-        filterDateInput.value = '';
-        filterTypeInput.value = '';
-        filterStatusSelect.value = '';
-        renderSessions();
-    });
-
-    renderSessions(); // Affiche les séances au premier chargement
+    displaySessions(); // Afficher toutes les séances au chargement de cette vue
 }
 
 /**
- * Affiche une séance spécifique pour la complétion (appelée depuis "Mes Séances" ou "Séance du Jour").
- * @param {Object} sessionToComplete - L'objet de la séance à compléter.
+ * Affiche la liste des séances filtrées et triées.
  */
-function displaySessionForCompletion(sessionToComplete) {
-    // Masquer le bouton de filtre si jamais il était visible
-    const filterToggleBtn = document.getElementById('filterToggleBtn');
-    if (filterToggleBtn) filterToggleBtn.style.display = 'none';
+function displaySessions() {
+    const sessionsList = document.getElementById('sessionsList');
+    let sessions = loadSessions();
 
-    appContainer.innerHTML = `
-        <section class="today-session-section content-section">
-            <h2>Compléter la séance : ${sessionToComplete.type} - ${new Date(sessionToComplete.date).toLocaleDateString('fr-FR')}</h2>
-            <form id="completeSessionForm">
-                <input type="hidden" id="sessionId" value="${sessionToComplete.id}">
-                <div id="completedExercisesContainer">
-                    ${formatPlannedExercisesForCompletion(sessionToComplete.exercises)}
+    const filterDate = document.getElementById('filterDate')?.value;
+    const filterType = document.getElementById('filterType')?.value.toLowerCase();
+    const filterStatus = document.getElementById('filterStatus')?.value;
+
+    let filteredSessions = sessions.filter(session => {
+        const matchesDate = !filterDate || session.date === filterDate;
+        const matchesType = !filterType || session.type.toLowerCase().includes(filterType);
+        const matchesStatus = filterStatus === 'all' || session.status === filterStatus;
+        return matchesDate && matchesType && matchesStatus;
+    });
+
+    // Trier les séances: d'abord par date (plus récent en premier), puis par statut (planifiée avant complétée)
+    filteredSessions.sort((a, b) => {
+        // Tri par date décroissante
+        const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (dateComparison !== 0) {
+            return dateComparison;
+        }
+        // Pour la même date, les planifiées viennent avant les complétées
+        if (a.status === 'planned' && b.status === 'completed') {
+            return -1;
+        }
+        if (a.status === 'completed' && b.status === 'planned') {
+            return 1;
+        }
+        return 0;
+    });
+
+
+    if (filteredSessions.length === 0) {
+        sessionsList.innerHTML = '<p class="no-results-message">Aucune séance trouvée avec les filtres actuels.</p>';
+        return;
+    }
+
+    sessionsList.innerHTML = filteredSessions.map(session => {
+        const sessionDate = new Date(session.date).toLocaleDateString('fr-FR');
+        const sessionClass = session.status === 'completed' ? 'session-completed' : 'session-planned';
+        const statusText = session.status === 'completed' ? 'Complétée' : 'Planifiée';
+        const numExercises = session.exercises ? session.exercises.length : 0;
+        const descriptionText = numExercises > 0 ? `${numExercises} exercice(s)` : 'Aucun exercice';
+
+        return `
+            <div class="session-card ${sessionClass}" data-session-id="${session.id}" data-session-status="${session.status}">
+                <div class="session-card-header">
+                    <div class="session-card-content">
+                        <h3>
+                            ${session.type} - ${sessionDate} 
+                            <span class="session-status">${statusText}</span>
+                        </h3>
+                        <p class="session-card-description">${descriptionText}</p>
+                    </div>
+                    <button type="button" class="delete-session-btn" data-session-id="${session.id}">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
                 </div>
-                <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
-            </form>
-            <button type="button" id="cancelSessionBtn" class="btn btn-danger">Annuler la complétion / Retour</button>
-        </section>
-    `;
+            </div>
+        `;
+    }).join('');
 
-    // Attacher les écouteurs d'événements pour les boutons d'ajout/suppression de série après l'injection
-    document.querySelectorAll('.exercise-block .add-series-btn').forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            const seriesContainer = event.target.closest('.exercise-block').querySelector('.series-container');
-            addSeriesToExercise(seriesContainer);
+    // Ajouter les écouteurs pour les cartes cliquables et les boutons de suppression
+    document.querySelectorAll('.session-card').forEach(card => {
+        card.addEventListener('click', (event) => {
+            // Vérifier si le clic n'est PAS sur le bouton de suppression
+            if (!event.target.closest('.delete-session-btn')) {
+                const sessionId = card.dataset.sessionId;
+                const sessionStatus = card.dataset.sessionStatus;
+                if (sessionStatus === 'completed') {
+                    const sessionToView = loadSessions().find(s => s.id === sessionId);
+                    if (sessionToView) {
+                        displayCompletedSessionDetails(sessionToView);
+                    }
+                } else if (sessionStatus === 'planned') {
+                     // Si c'est une séance planifiée, rediriger vers la séance du jour pour la compléter
+                    const sessionToComplete = loadSessions().find(s => s.id === sessionId);
+                    if (sessionToComplete) {
+                        showTodaySessionViewForSpecificDate(sessionToComplete.date);
+                    }
+                }
+            }
         });
     });
-    document.querySelectorAll('.exercise-block .remove-series-btn').forEach(btn => {
-        btn.addEventListener('click', (event) => event.target.closest('.series-row').remove());
+
+    document.querySelectorAll('.delete-session-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // Empêche le clic sur la carte parente
+            const sessionId = event.currentTarget.dataset.sessionId;
+            const session = loadSessions().find(s => s.id === sessionId);
+            if (session && confirm(`Êtes-vous sûr de vouloir supprimer cette séance (${session.type} du ${new Date(session.date).toLocaleDateString('fr-FR')}) ?`)) {
+                deleteSession(sessionId);
+                displaySessions(); // Rafraîchir la liste après suppression
+            }
+        });
     });
-    document.getElementById('completeSessionForm').addEventListener('submit', handleCompleteSessionSubmit);
-    // Le bouton d'annulation renvoie vers la vue "Mes Séances"
-    document.getElementById('cancelSessionBtn').addEventListener('click', showViewSessionsView);
 }
 
 /**
@@ -374,253 +563,17 @@ function displayCompletedSessionDetails(sessionToView) {
     });
 }
 
-
-// --- 3. Gestion de l'ajout d'exercices planifiés (pour la création de séance) ---
-
-let plannedExerciseCounter = 0;
-
 /**
- * Ajoute un nouveau bloc d'exercice planifié au formulaire de création de séance.
- */
-function addPlannedExerciseToForm() {
-    plannedExerciseCounter++;
-    const plannedExerciseId = `planned-exercise-${plannedExerciseCounter}`;
-    const plannedExercisesContainer = document.getElementById('plannedExercisesContainer');
-
-    const exerciseDiv = document.createElement('div');
-    exerciseDiv.classList.add('exercise-block'); // Réutilise la classe de style
-    exerciseDiv.id = plannedExerciseId;
-    exerciseDiv.innerHTML = `
-        <h3>
-            <input type="text" class="exercise-name" placeholder="Nom de l'exercice (Ex: Leg curl assis)" required>
-            <button type="button" class="btn-danger remove-exercise-btn">X</button>
-        </h3>
-        <div class="form-group">
-            <label for="series-planned-${plannedExerciseCounter}">Nombre de séries prévues :</label>
-            <input type="number" id="series-planned-${plannedExerciseCounter}" class="series-planned" value="3" min="1" required>
-        </div>
-    `;
-    plannedExercisesContainer.appendChild(exerciseDiv);
-
-    const noExercisesMessage = plannedExercisesContainer.querySelector('.no-exercises-message');
-    if (noExercisesMessage) {
-        noExercisesMessage.remove();
-    }
-
-    exerciseDiv.querySelector('.remove-exercise-btn').addEventListener('click', () => exerciseDiv.remove());
-}
-
-
-// --- 4. Gestion de la soumission du formulaire de CRÉATION de séance ---
-
-/**
- * Gère la soumission du formulaire de création de séance (planification).
- * @param {Event} event - L'événement de soumission du formulaire.
- */
-function handleCreateSessionSubmit(event) {
-    event.preventDefault();
-
-    const sessionDate = document.getElementById('createSessionDate').value;
-    const sessionType = document.getElementById('createSessionType').value.trim();
-
-    if (!sessionDate || !sessionType) {
-        alert("Veuillez remplir la date et le type de séance.");
-        return;
-    }
-
-    const plannedExercises = [];
-    document.querySelectorAll('#plannedExercisesContainer .exercise-block').forEach(exerciseBlock => {
-        const exerciseName = exerciseBlock.querySelector('.exercise-name').value.trim();
-        const plannedSeries = parseInt(exerciseBlock.querySelector('.series-planned').value);
-
-        if (!exerciseName || isNaN(plannedSeries) || plannedSeries < 1) {
-            alert("Veuillez vérifier le nom de l'exercice et le nombre de séries prévues.");
-            return;
-        }
-
-        // Crée des séries "vides" pour la planification
-        const series = Array.from({ length: plannedSeries }, () => ({ reps: null, weight: null, rest: null }));
-
-        plannedExercises.push({ name: exerciseName, series });
-    });
-
-    if (plannedExercises.length === 0) {
-        alert("Veuillez ajouter au moins un exercice planifié à votre séance.");
-        return;
-    }
-
-    // Vérifier s'il existe déjà une séance planifiée pour cette date
-    const existingSessions = loadSessions();
-    const existingPlannedSession = existingSessions.find(s => s.date === sessionDate && s.status === 'planned');
-
-    if (existingPlannedSession) {
-        if (!confirm(`Une séance planifiée existe déjà pour le ${new Date(sessionDate).toLocaleDateString('fr-FR')}. Voulez-vous la remplacer ?`)) {
-            return;
-        }
-        // Supprimer l'ancienne séance planifiée pour la remplacer
-        deleteSession(existingPlannedSession.id);
-    }
-
-    const newSession = {
-        id: 'sess_' + Date.now(), // ID unique pour chaque séance
-        date: sessionDate,
-        type: sessionType,
-        exercises: plannedExercises,
-        status: 'planned' // Nouveau statut: 'planned' ou 'completed'
-    };
-
-    saveSession(newSession);
-    alert("Séance planifiée et générée avec succès !");
-    showViewSessionsView(); // Redirige vers la vue "Mes Séances" après la planification
-}
-
-
-// --- 5. Gestion de la soumission du formulaire de COMPLETION de séance (à la salle) ---
-
-/**
- * Gère la soumission du formulaire de complétion de séance.
- * Collecte les données réelles et met à jour la séance dans le LocalStorage.
- * @param {Event} event - L'événement de soumission du formulaire.
- */
-function handleCompleteSessionSubmit(event) {
-    event.preventDefault();
-
-    const sessionId = document.getElementById('sessionId').value;
-    const sessions = loadSessions();
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-
-    if (sessionIndex === -1) {
-        alert("Erreur: Séance non trouvée pour la complétion.");
-        return;
-    }
-
-    const completedExercises = [];
-    let isValid = true; // Flag pour valider toutes les saisies
-
-    document.querySelectorAll('#completedExercisesContainer .exercise-block').forEach(exerciseBlock => {
-        const exerciseName = exerciseBlock.querySelector('.exercise-name-display').textContent.trim();
-        if (!exerciseName) {
-            isValid = false;
-            return;
-        }
-
-        const series = [];
-        exerciseBlock.querySelectorAll('.series-row').forEach(seriesRow => {
-            const repsInput = seriesRow.querySelector('.series-reps');
-            const weightInput = seriesRow.querySelector('.series-weight');
-            const restInput = seriesRow.querySelector('.series-rest');
-
-            const reps = repsInput ? parseInt(repsInput.value) : null;
-            const weight = weightInput ? parseFloat(weightInput.value) : null;
-            const rest = restInput ? (parseInt(restInput.value) || null) : null;
-
-            // Validation des champs obligatoires
-            if (isNaN(reps) || isNaN(weight) || reps === null || weight === null || repsInput.value === "" || weightInput.value === "") {
-                isValid = false;
-                return;
-            }
-
-            series.push({ reps, weight, rest });
-        });
-
-        if (series.length === 0 && isValid) {
-            alert(`L'exercice "${exerciseName}" doit avoir au moins une série complétée.`);
-            isValid = false;
-            return;
-        }
-        if (isValid) {
-            completedExercises.push({ name: exerciseName, series });
-        }
-    });
-
-    if (!isValid) {
-        alert("Veuillez renseigner les répétitions et le poids pour toutes les séries complétées.");
-        return;
-    }
-
-    if (completedExercises.length === 0) {
-        alert("Veuillez compléter au moins un exercice pour enregistrer la séance.");
-        return;
-    }
-
-    // Mettre à jour la séance existante
-    sessions[sessionIndex].exercises = completedExercises;
-    sessions[sessionIndex].status = 'completed'; // Marquer comme complétée
-
-    localStorage.setItem('gymSessions', JSON.stringify(sessions));
-    alert("Séance complétée et enregistrée avec succès !");
-    showViewSessionsView(); // Redirige vers la vue des séances complétées
-}
-
-
-// --- 6. Fonctions utilitaires et de rendu ---
-
-/**
- * Formate les exercices planifiés pour l'affichage dans la vue de complétion.
- * @param {Array} exercises - Tableau d'exercices planifiés.
- * @returns {string} Le HTML formaté des détails.
- */
-function formatPlannedExercisesForCompletion(exercises) {
-    let html = '';
-    exercises.forEach(exercise => {
-        html += `
-            <div class="exercise-block">
-                <h3><span class="exercise-name-display">${exercise.name}</span></h3>
-                <div class="series-container">
-        `;
-        // Créer les champs pour le nombre de séries prévues
-        // Remplir les champs avec les données existantes si la séance a déjà été partiellement complétée
-        exercise.series.forEach((seriesData, index) => {
-            html += `
-                    <div class="series-row">
-                        <span class="series-label">Série ${index + 1}:</span>
-                        <input type="number" class="series-reps" placeholder="Répétitions" min="1" value="${seriesData.reps !== null ? seriesData.reps : ''}" required>
-                        <input type="number" class="series-weight" placeholder="Poids (kg)" step="0.5" value="${seriesData.weight !== null ? seriesData.weight : ''}" required>
-                        <input type="number" class="series-rest" placeholder="Repos (s) (optionnel)" value="${seriesData.rest !== null ? seriesData.rest : ''}">
-                        <button type="button" class="btn-danger remove-series-btn">Suppr.</button>
-                    </div>
-            `;
-        });
-        html += `
-                </div>
-                <button type="button" class="btn add-series-btn">Ajouter une série</button>
-            </div>
-        `;
-    });
-    return html;
-}
-
-/**
- * Ajoute une nouvelle ligne de série à un conteneur d'exercice donné (utilisé pour la complétion).
- * @param {HTMLElement} seriesContainer - Le conteneur DOM où ajouter la série.
- */
-function addSeriesToExercise(seriesContainer) {
-    const currentSeriesCount = seriesContainer.querySelectorAll('.series-row').length;
-    const seriesDiv = document.createElement('div');
-    seriesDiv.classList.add('series-row');
-    seriesDiv.innerHTML = `
-        <span class="series-label">Série ${currentSeriesCount + 1}:</span>
-        <input type="number" class="series-reps" placeholder="Répétitions" min="1" required>
-        <input type="number" class="series-weight" placeholder="Poids (kg)" step="0.5" required>
-        <input type="number" class="series-rest" placeholder="Repos (s) (optionnel)">
-        <button type="button" class="btn-danger remove-series-btn">Suppr.</button>
-    `;
-    seriesContainer.appendChild(seriesDiv);
-
-    seriesDiv.querySelector('.remove-series-btn').addEventListener('click', () => seriesDiv.remove());
-}
-
-
-/**
- * Formate les détails d'une séance pour l'affichage (vue "Mes Séances").
- * @param {Object} session - L'objet session à formater.
+ * Formate les détails d'une séance pour l'affichage.
+ * @param {Object} session - La séance à formater.
  * @returns {string} Le HTML formaté des détails.
  */
 function formatSessionDetails(session) {
-    let detailsHtml = '';
-    if (session.exercises.length === 0) {
-        return `<p>Aucun exercice enregistré pour cette séance.</p>`;
+    if (!session || !session.exercises || session.exercises.length === 0) {
+        return '<p>Aucun détail d\'exercice disponible pour cette séance.</p>';
     }
+
+    let detailsHtml = '';
     session.exercises.forEach(exercise => {
         detailsHtml += `
             <div class="exercise-display">
@@ -628,17 +581,14 @@ function formatSessionDetails(session) {
                 <ul>
         `;
         if (exercise.series && exercise.series.length > 0) {
-            exercise.series.forEach((series, sIndex) => {
-                const repsDisplay = series.reps !== null ? `${series.reps} reps` : 'N/A reps';
-                const weightDisplay = series.weight !== null ? `${series.weight} kg` : 'N/A kg';
-                const restDisplay = series.rest !== null && series.rest !== '' ? ` (Repos: ${series.rest}s)` : '';
-
-                detailsHtml += `
-                        <li>Série ${sIndex + 1}: ${repsDisplay} @ ${weightDisplay}${restDisplay}</li>
-                `;
+            exercise.series.forEach((series, index) => {
+                const reps = series.reps !== null ? `${series.reps} reps` : 'N/A';
+                const weight = series.weight !== null ? `${series.weight} kg` : 'N/A';
+                const rest = series.rest !== null ? `${series.rest}s repos` : 'N/A';
+                detailsHtml += `<li>Série ${index + 1} : ${reps} @ ${weight} (${rest})</li>`;
             });
         } else {
-            detailsHtml += `<li>Pas de séries enregistrées pour cet exercice.</li>`;
+            detailsHtml += '<li>Pas de séries enregistrées pour cet exercice.</li>';
         }
         detailsHtml += `
                 </ul>
@@ -648,43 +598,90 @@ function formatSessionDetails(session) {
     return detailsHtml;
 }
 
-
-// --- 7. Fonctions de gestion du LocalStorage ---
-// Note: Les IDs de session sont maintenant utilisés pour identifier et supprimer précisément.
-
 /**
- * Charge toutes les séances depuis le LocalStorage.
- * @returns {Array} Un tableau de toutes les séances.
+ * Affiche la vue "Séance du Jour" pour une date spécifique, typiquement pour la complétion.
+ * @param {string} date - La date de la séance à afficher (format YYYY-MM-DD).
  */
-function loadSessions() {
-    const sessions = localStorage.getItem('gymSessions');
-    return sessions ? JSON.parse(sessions) : [];
-}
+function showTodaySessionViewForSpecificDate(date) {
+    // Masquer le bouton de filtre si jamais il était visible
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    if (filterToggleBtn) filterToggleBtn.style.display = 'none';
 
-/**
- * Sauvegarde une nouvelle séance ou met à jour une séance existante dans le LocalStorage.
- * @param {Object} session - L'objet de la séance à sauvegarder/mettre à jour.
- */
-function saveSession(session) {
-    let sessions = loadSessions();
-    const existingIndex = sessions.findIndex(s => s.id === session.id);
+    const sessions = loadSessions();
+    const specificSession = sessions.find(session => session.date === date && session.status === 'planned');
 
-    if (existingIndex > -1) {
-        sessions[existingIndex] = session; // Met à jour la séance existante
+    if (specificSession) {
+        let exercisesHtml = '';
+        specificSession.exercises.forEach((exercise, exerciseIndex) => {
+            exercisesHtml += `
+                <div class="exercise-block">
+                    <h3>
+                        <span class="exercise-name-display">${exercise.name}</span>
+                        <button type="button" class="btn small-btn btn-primary add-series-btn" data-exercise-index="${exerciseIndex}">Ajouter une série</button>
+                    </h3>
+                    <div class="series-container" id="series-container-${exerciseIndex}">
+                        </div>
+                </div>
+            `;
+        });
+
+        appContainer.innerHTML = `
+            <section class="today-session-section content-section">
+                <h2>Séance du Jour : ${specificSession.type} - ${new Date(specificSession.date).toLocaleDateString('fr-FR')}</h2>
+                <form id="completeSessionForm">
+                    ${exercisesHtml}
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" class="btn">Terminer et Enregistrer la séance</button>
+                        <button type="button" id="cancelTodaySessionBtn" class="btn btn-danger">Annuler la séance (ne pas enregistrer)</button>
+                    </div>
+                </div>
+                </form>
+            </section>
+        `;
+
+        specificSession.exercises.forEach((exercise, exerciseIndex) => {
+            const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
+            // Remplir les séries existantes
+            exercise.series.forEach((seriesData, seriesIndex) => {
+                addSeriesRow(seriesContainer, exerciseIndex, seriesIndex, seriesData.reps, seriesData.weight, seriesData.rest);
+            });
+        });
+
+        document.querySelectorAll('.add-series-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const exerciseIndex = event.target.dataset.exerciseIndex;
+                const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
+                addSeriesRow(seriesContainer, exerciseIndex, specificSession.exercises[exerciseIndex].series.length, null, null, null);
+                // Ajouter une série vide au modèle de données temporaire pour cohérence
+                specificSession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
+            });
+        });
+
+        document.getElementById('completeSessionForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            handleCompleteSessionSubmit(specificSession);
+        });
+
+        document.getElementById('cancelTodaySessionBtn').addEventListener('click', () => {
+            if (confirm('Voulez-vous vraiment annuler cette séance planifiée ? Elle sera supprimée.')) {
+                deleteSession(specificSession.id);
+                showViewSessionsView(); // Retourne à la liste des séances
+            }
+        });
+
     } else {
-        sessions.push(session); // Ajoute une nouvelle séance
+        appContainer.innerHTML = `
+            <section class="today-session-section content-section">
+                <h2>Séance du Jour</h2>
+                <p class="no-sessions-message">Pas de séance planifiée pour cette date, ou la séance a déjà été complétée.</p>
+                <p class="no-sessions-message">Cliquez sur "Nouvelle Séance" pour en créer une, ou "Mes Séances" pour voir l'historique.</p>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn" onclick="showCreateSessionView()">Nouvelle Séance</button>
+                    <button type="button" class="btn" onclick="showViewSessionsView()">Mes Séances</button>
+                </div>
+            </section>
+        `;
     }
-    localStorage.setItem('gymSessions', JSON.stringify(sessions));
-}
-
-/**
- * Supprime une séance du LocalStorage par son ID.
- * @param {string} sessionId - L'ID de la séance à supprimer.
- */
-function deleteSession(sessionId) {
-    let sessions = loadSessions();
-    const updatedSessions = sessions.filter(session => session.id !== sessionId);
-    localStorage.setItem('gymSessions', JSON.stringify(updatedSessions));
 }
 
 
@@ -694,9 +691,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addSessionBtn.addEventListener('click', showCreateSessionView); // Bouton "Nouvelle Séance" -> Créer une séance
     viewSessionsBtn.addEventListener('click', showViewSessionsView); // Bouton "Mes Séances" -> Mes Séances
 
-    // Ancienne ligne à supprimer ou commenter :
-    // showTodaySessionView(); // Afficher la vue "Séance du jour" par défaut au chargement
-
-    // Nouvelle ligne à ajouter pour afficher "Mes Séances" au démarrage :
-    showViewSessionsView(); // Afficher la vue "Mes Séances" par défaut au chargement
+    // Afficher la vue "Mes Séances" par défaut au chargement :
+    showViewSessionsView(); 
 });
