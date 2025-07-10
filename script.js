@@ -30,8 +30,7 @@ function deleteSession(sessionId) {
 
 // --- 2. Références DOM Globales ---
 const appContainer = document.getElementById('app-container');
-const addSessionBtn = document.getElementById('addSessionBtn');
-const viewSessionsBtn = document.getElementById('viewSessionsBtn');
+
 
 // --- 3. Fonctions de Vue ---
 
@@ -688,8 +687,22 @@ function showTodaySessionViewForSpecificDate(date) {
 // --- 8. Initialisation et Écouteurs d'événements globaux ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    addSessionBtn.addEventListener('click', showCreateSessionView); // Bouton "Nouvelle Séance" -> Créer une séance
-    viewSessionsBtn.addEventListener('click', showViewSessionsView); // Bouton "Mes Séances" -> Mes Séances
+    // Déplacez la sélection des boutons ICI pour être sûr qu'ils existent
+    const addSessionBtn = document.getElementById('addSessionBtn');
+    const viewSessionsBtn = document.getElementById('viewSessionsBtn');
+
+    // Vérifiez si les éléments existent avant d'attacher les écouteurs
+    if (addSessionBtn) {
+        addSessionBtn.addEventListener('click', showCreateSessionView);
+    } else {
+        console.error("Erreur : Le bouton 'Nouvelle Séance' (ID: addSessionBtn) n'a pas été trouvé dans le DOM.");
+    }
+
+    if (viewSessionsBtn) {
+        viewSessionsBtn.addEventListener('click', showViewSessionsView);
+    } else {
+        console.error("Erreur : Le bouton 'Mes Séances' (ID: viewSessionsBtn) n'a pas été trouvé dans le DOM.");
+    }
 
     // Afficher la vue "Mes Séances" par défaut au chargement :
     showViewSessionsView(); 
