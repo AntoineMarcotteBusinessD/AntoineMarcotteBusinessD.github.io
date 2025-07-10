@@ -256,44 +256,48 @@ h1, h2, h3, h4 {
     border-radius: 8px;
     margin-bottom: 1rem;
     box-shadow: var(--shadow-sm);
+    position: relative; /* IMPORTANT pour le positionnement absolu du bouton */
 }
 
-.exercise-header {
+/* --- MODIFICATION POUR LE BOUTON 'X' DANS 'NOUVELLE SÉANCE' (EN BAS À DROITE) --- */
+.create-session-section .exercise-header {
     display: flex;
-    align-items: center; /* Alignement vertical */
-    gap: 1rem; /* Espacement entre l'input et le bouton */
+    align-items: center;
+    gap: 0.75rem;
     margin-bottom: 1rem;
-    position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
-    padding-right: 3rem; /* Ajouté: Pour laisser de la place au bouton à droite */
+    /* Supprimez ou assurez-vous qu'il n'y a pas de `position: absolute` ici */
 }
 
-.exercise-header .exercise-name {
-    flex-grow: 1; /* Prend l'espace disponible */
-    font-size: 1rem; /* Ajuster la taille de la police */
-    padding: 0.5rem 0.75rem; /* Ajuster le padding */
-    padding-right: 45px; /* Augmenter l'espace à droite du texte pour le bouton */
+.create-session-section .exercise-name {
+    flex-grow: 1; /* Permet à l'input de prendre l'espace disponible */
+    /* Assurez-vous que le padding-right n'est pas trop grand s'il était là */
 }
 
-.exercise-header .remove-exercise-btn {
-    width: 32px; /* Réduire la taille */
-    height: 32px; /* Réduire la taille */
-    font-size: 1rem; /* Réduire la taille de la croix */
+.create-session-section .remove-exercise-btn {
+    position: absolute; /* Positionnement absolu par rapport au parent .exercise-block */
+    bottom: 10px; /* Distance du bas */
+    right: 10px; /* Distance de la droite */
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     border-radius: 50%;
-    position: absolute;
-    top: 50%; /* Centrer verticalement */
-    right: 8px; /* Positionner à droite, à l'intérieur du padding */
-    transform: translateY(-50%); /* Ajustement pour un centrage parfait */
-    box-shadow: var(--shadow-xs); /* Ombre plus subtile */
+    box-shadow: var(--shadow-xs);
+    z-index: 10; /* S'assure qu'il est au-dessus des autres éléments */
+    /* Supprimez flex-shrink, margin-left, transform, top, right si présents */
+    flex-shrink: unset;
+    margin-left: unset;
+    transform: none;
+    top: auto;
+    left: auto;
 }
 
-/* Rendre le champ de nombre de séries plus petit */
-.exercise-block .num-series {
-    max-width: 100px; /* Limiter la largeur de l'input */
-    text-align: center;
+/* Ajustement pour le champ Nombre de séries planifiées si nécessaire */
+.create-session-section .num-series {
+    max-width: 150px; /* Ou une valeur qui semble bonne pour toi */
 }
 
 
@@ -460,54 +464,55 @@ h1, h2, h3, h4 {
     flex-grow: 1; /* Permet au nom de prendre de l'espace */
 }
 
-/* Rendre les champs de séries plus compacts et responsives */
+/* --- MODIFICATION POUR LE BOUTON 'X' DANS 'SÉANCE DU JOUR' (POSITIONNEMENT) --- */
 .series-row {
     display: flex;
-    flex-wrap: wrap; /* Permet aux champs de passer à la ligne */
-    gap: 0.5rem;
+    align-items: center; /* Aligner verticalement tous les éléments */
+    gap: 0.75rem; /* Espace entre les champs */
     margin-bottom: 0.75rem;
-    align-items: center;
-    background-color: var(--color-white); /* Pour mieux les différencier */
-    padding: 0.75rem;
-    padding-left: 3rem; /* Ajouté: Pour laisser de la place au bouton à gauche */
+    background-color: var(--color-white);
+    padding: 0.75rem 1rem;
     border-radius: 5px;
     box-shadow: var(--shadow-xs);
-    position: relative; /* Ajouté: Permet de positionner l'enfant de manière absolue */
+    position: relative; /* IMPORTANT : doit être relative pour positionner le bouton absolument */
 }
 
 .series-row .series-label {
-    font-weight: bold;
     flex-shrink: 0; /* Empêche le label de rétrécir */
-    margin-right: 0.5rem; /* Espace entre le label et les inputs */
-    min-width: 60px; /* Pour une meilleure cohérence sur différentes tailles */
+    font-weight: bold;
+    min-width: 60px; /* Maintient une largeur minimale pour le label */
 }
 
 .series-row .form-group {
-    flex: 1; /* Chaque input prend un tiers de l'espace */
-    min-width: 80px; /* Largeur minimale pour les inputs */
+    flex-grow: 1; /* Permet aux groupes de champs de prendre l'espace disponible */
+    flex-basis: 0; /* Base de taille flexible, combinée avec flex-grow */
+    min-width: 80px; /* Largeur minimale pour chaque champ sur des écrans plus grands */
+    margin-bottom: 0; /* Pas de marge verticale entre les groupes de la même ligne */
 }
 
 .series-row .form-control {
-    width: 100%; /* Assure que l'input remplit son conteneur */
-    padding: 0.5rem;
-    font-size: 0.9rem;
+    width: 100%; /* S'assure que l'input remplit bien son groupe */
 }
 
 .series-row .remove-series-btn {
-    width: 28px; /* Réduire la taille */
-    height: 28px; /* Réduire la taille */
-    font-size: 0.8rem; /* Réduire la taille de la croix */
+    /* Style par défaut pour les grands écrans */
+    flex-shrink: 0;
+    margin-left: auto; /* Pousse le bouton à l'extrême droite */
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     border-radius: 50%;
-    position: absolute;
-    top: 50%; /* Centrer verticalement */
-    left: 10px; /* Déplacé de 8px à 10px pour un léger décalage à droite */
-    transform: translateY(-50%); /* Ajustement pour un centrage parfait */
-    box-shadow: var(--shadow-xs); /* Ombre plus subtile */
+    box-shadow: var(--shadow-xs);
+    position: static; /* Par défaut, statique pour flexbox */
+    top: auto;
+    left: auto;
+    transform: none;
 }
+
 
 .today-session-section .buttons-container.series-action-buttons {
     justify-content: flex-end; /* Aligner le bouton "Ajouter une série" à droite */
@@ -618,34 +623,18 @@ h1, h2, h3, h4 {
         max-width: 300px; /* Limite la largeur max sur des écrans un peu plus grands */
     }
 
-    /* Exercices planifiés */
-    .exercise-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-        padding-top: 0.5rem;
-        padding-right: 0.5rem;
-        position: relative;
+    /* Exercices planifiés (bouton en bas à droite) */
+    .create-session-section .exercise-header {
+        flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
+        justify-content: flex-start; /* Aligner à gauche */
     }
+    .create-session-section .exercise-name {
+        width: 100%; /* Prend toute la largeur disponible */
+        margin-right: 0;
+        margin-bottom: 0.75rem; /* Espace sous le nom de l'exercice */
+    }
+    /* Le bouton .remove-exercise-btn reste positionné absolument en bas à droite */
 
-    .exercise-header .exercise-name {
-        width: 100%;
-        padding-right: 35px; /* Assurez-vous que cet espace est suffisant */
-        margin-bottom: 0.25rem; /* Ajouté: Pour pousser un peu le bouton vers le bas s'il est au-dessus */
-    }
-
-    .exercise-header .remove-exercise-btn {
-        top: 12px; /* Baisser le bouton légèrement sur mobile */
-        right: 5px;
-        transform: none; /* Supprimer la transformation Y pour une position fixe */
-        width: 28px;
-        height: 28px;
-        font-size: 0.9rem;
-    }
-
-    .exercise-block .num-series {
-        max-width: 100%; /* Prend toute la largeur sur mobile */
-    }
 
     /* Filtres */
     .filter-controls {
@@ -678,35 +667,45 @@ h1, h2, h3, h4 {
         width: 100%;
     }
 
-    /* Séries de complétion de séance */
+    /* --- MODIFICATION POUR LE BOUTON 'X' DANS 'SÉANCE DU JOUR' (POSITIONNEMENT MOBILE) --- */
     .series-row {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 0.5rem 0.5rem 2.5rem;
-        margin-bottom: 0.5rem;
+        flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
+        justify-content: flex-start; /* Aligner les éléments au début */
+        align-items: center;
+        padding: 0.75rem 40px 0.75rem 0.75rem; /* Ajouter du padding à droite pour le bouton */
     }
-    .series-row .form-group {
-        width: 100%;
-        min-width: unset;
-        margin-bottom: 0.5rem;
-    }
-    .series-row .form-group:last-of-type {
-        margin-bottom: 0;
-    }
+
     .series-row .series-label {
-        width: calc(100% - 10px);
-        margin-bottom: 0.5rem;
+        flex-basis: 100%; /* Le label prend toute la largeur sur mobile */
+        margin-bottom: 0.5rem; /* Espace après le label */
         margin-right: 0;
+        order: 1; /* Ordre pour s'assurer qu'il est en haut */
     }
+
     .series-row .remove-series-btn {
-        top: 12px; /* Déplacé de 10px à 12px pour le descendre un peu */
-        left: 8px; /* Déplacé de 5px à 8px pour un léger décalage à droite */
-        transform: none;
-        width: 24px;
-        height: 24px;
-        font-size: 0.7rem;
+        position: absolute; /* Positionnement absolu pour le mobile */
+        top: 10px; /* Distance du haut */
+        right: 10px; /* Distance de la droite */
+        left: auto; /* S'assurer qu'il n'y a pas de left conflictuel */
+        margin-left: 0; /* Annuler le auto-margin */
+        order: 0; /* Assurer qu'il est affiché en premier, même s'il est absolu */
+        width: 28px;
+        height: 28px;
     }
-    
+
+    .series-row .form-group {
+        flex-basis: calc(50% - 0.5rem); /* Deux champs par ligne sur mobile */
+        min-width: unset;
+        margin-bottom: 0.5rem; /* Ajout d'une marge entre les groupes sur mobile */
+        order: 2; /* Les champs viennent après le label et le bouton */
+    }
+
+    .series-row .form-group:nth-of-type(3) {
+        flex-basis: 100%; /* Le troisième champ prend toute la largeur si pas de place */
+        order: 3; /* Ordre pour le dernier champ */
+    }
+
+
     .today-session-section .buttons-container.series-action-buttons {
         justify-content: center;
         margin-bottom: 1rem;

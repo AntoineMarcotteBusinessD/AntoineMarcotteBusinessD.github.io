@@ -79,20 +79,16 @@ function showCreateSessionView() {
 
     document.getElementById('sessionDate').valueAsDate = new Date(); // Date du jour par défaut
 
+    let exerciseCounter = 0; // Pour générer des IDs uniques pour les exercices
     const addExerciseBtn = document.getElementById('addExerciseBtn');
     const plannedExercisesContainer = document.getElementById('plannedExercisesContainer');
     const createSessionForm = document.getElementById('createSessionForm');
     const cancelCreateSessionBtn = document.getElementById('cancelCreateSessionBtn');
 
-    // Initialise le compteur d'exercices à chaque fois que la vue est affichée
-    let exerciseCounter = 0;
-
-    // Fonction pour ajouter un bloc d'exercice avec son bouton de suppression
-    function addExerciseBlock() {
-        exerciseCounter++; // Incrémente le compteur pour l'ID unique
+    addExerciseBtn.addEventListener('click', () => {
+        exerciseCounter++;
         const exerciseBlock = document.createElement('div');
         exerciseBlock.classList.add('exercise-block');
-        // Utilisation de l'ID pour l'input numSeries si nécessaire, mais pas pour le bloc lui-même
         exerciseBlock.innerHTML = `
             <div class="exercise-header">
                 <input type="text" class="form-control exercise-name" placeholder="Nom de l'exercice" required>
@@ -105,30 +101,16 @@ function showCreateSessionView() {
         `;
         plannedExercisesContainer.appendChild(exerciseBlock);
 
-        // Ajoute l'écouteur directement sur le bouton de suppression fraîchement créé
         exerciseBlock.querySelector('.remove-exercise-btn').addEventListener('click', () => {
-            // Confirmation avant de supprimer
-            if (confirm('Êtes-vous sûr de vouloir supprimer cet exercice planifié ?')) {
-                plannedExercisesContainer.removeChild(exerciseBlock);
-                // Pas besoin de ré-indexer les IDs `numSeries-` ici car ils sont juste des labels de formulaire.
-                // L'important est que l'élément DOM soit retiré avant la soumission du formulaire.
-            }
+            plannedExercisesContainer.removeChild(exerciseBlock);
         });
-    }
-
-    addExerciseBtn.addEventListener('click', addExerciseBlock); // Utilise la nouvelle fonction
+    });
 
     createSessionForm.addEventListener('submit', handleCreateSessionSubmit);
-    cancelCreateSessionBtn.addEventListener('click', showViewSessionsView);
+    cancelCreateSessionBtn.addEventListener('click', showViewSessionsView); // Annuler redirige vers "Mes Séances"
 
     const addSessionNavBtn = document.getElementById('addSessionBtn');
-    activateNavLink(addSessionNavBtn);
-
-    // Ajoute un exercice par défaut au chargement de la vue, s'il n'y en a pas déjà
-    // Ceci s'assure qu'un champ est toujours visible pour commencer
-    if (plannedExercisesContainer.children.length === 0) {
-        addExerciseBlock();
-    }
+    activateNavLink(addSessionNavBtn); // Active le bouton "Nouvelle Séance"
 }
 
 /**
@@ -226,7 +208,7 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
                         <button type="button" id="cancelTodaySessionBtn" class="btn danger-btn large-btn">Annuler la séance</button>
                     </div>
                 </div>
-
+                
                 <form id="completeSessionForm">
                     ${exercisesHtml}
                 </form>
@@ -276,8 +258,9 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
             </section>
         `;
     }
-    // Pas de bouton de navigation spécifique pour cette vue "Séance du Jour"
-    activateNavLink(null);
+    // Active le bouton "Mes Séances" quand on est dans la vue de complétion
+    const viewSessionsNavBtn = document.getElementById('viewSessionsBtn');
+    activateNavLink(viewSessionsNavBtn); 
 }
 
 /**
@@ -487,7 +470,7 @@ function displaySessions() {
                 <div class="session-card-header">
                     <div class="session-card-content">
                         <h3>
-                            ${session.type} - ${sessionDate}
+                            ${session.type} - ${sessionDate} 
                             <span class="session-status">${statusText}</span>
                         </h3>
                         <p class="session-card-description">${descriptionText}</p>
@@ -585,8 +568,9 @@ function displayCompletedSessionDetails(sessionToView) {
         }
     });
 
-    // Désactive les liens de navigation quand on est dans les détails d'une séance
-    activateNavLink(null);
+    // Active le bouton "Mes Séances" quand on est dans les détails d'une séance complétée
+    const viewSessionsNavBtn = document.getElementById('viewSessionsBtn');
+    activateNavLink(viewSessionsNavBtn);
 }
 
 /**
@@ -659,5 +643,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Afficher la vue "Mes Séances" par défaut au chargement :
-    showViewSessionsView();
+    showViewSessionsView(); 
 });
