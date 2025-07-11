@@ -130,8 +130,7 @@ function handleCreateSessionSubmit(event) {
 
         if (name && numSeries > 0) {
             const series = Array.from({ length: numSeries }, () => ({
-                reps: null, // Initialiser à null pour indiquer non renseigné
-                weight: null,
+                paliers: [{ reps: null, weight: null }], // Une série commence avec un palier vide
                 rest: null
             }));
             exercises.push({ name, series });
@@ -217,9 +216,11 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
 
         specificSession.exercises.forEach((exercise, exerciseIndex) => {
             const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
-            // Remplir les séries existantes
+            // Remplir les séries existantes avec les paliers
             exercise.series.forEach((seriesData, seriesIndex) => {
-                addSeriesRow(seriesContainer, exerciseIndex, seriesIndex, seriesData.reps, seriesData.weight, seriesData.rest);
+                // S'assurer qu'il y a au moins un palier ou un palier par défaut si vide
+                const initialPaliers = seriesData.paliers && seriesData.paliers.length > 0 ? seriesData.paliers : [{ reps: null, weight: null }];
+                addSeriesRow(seriesContainer, exerciseIndex, seriesIndex, initialPaliers, seriesData.rest);
             });
         });
 
@@ -227,9 +228,10 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
             button.addEventListener('click', (event) => {
                 const exerciseIndex = event.target.dataset.exerciseIndex;
                 const seriesContainer = document.getElementById(`series-container-${exerciseIndex}`);
-                addSeriesRow(seriesContainer, exerciseIndex, specificSession.exercises[exerciseIndex].series.length, null, null, null);
+                // Ajouter une nouvelle série avec un palier initial vide
+                addSeriesRow(seriesContainer, exerciseIndex, specificSession.exercises[exerciseIndex].series.length, [{ reps: null, weight: null }], null);
                 // Ajouter une série vide au modèle de données temporaire pour cohérence
-                specificSession.exercises[exerciseIndex].series.push({ reps: null, weight: null, rest: null });
+                specificSession.exercises[exerciseIndex].series.push({ paliers: [{ reps: null, weight: null }], rest: null });
             });
         });
 
@@ -268,30 +270,116 @@ function showTodaySessionView(date = new Date().toISOString().split('T')[0]) {
  * @param {HTMLElement} container - Le conteneur des séries.
  * @param {number} exerciseIndex - L'index de l'exercice parent.
  * @param {number} seriesIndex - L'index de la série à ajouter.
- * @param {number} [reps=''] - Nombre de répétitions (pré-rempli si existant).
- * @param {number} [weight=''] - Poids (pré-rempli si existant).
- * @param {number} [rest=''] - Temps de repos (pré-rempli si existant).
+ * @param {Array} [initialPaliers=[]] - Tableau des paliers (ex: [{ reps, weight }]).
+ * @param {number} [initialRest=''] - Temps de repos pour la série complète.
  */
-function addSeriesRow(container, exerciseIndex, seriesIndex, reps = '', weight = '', rest = '') {
+function addSeriesRow(container, exerciseIndex, seriesIndex, initialPaliers = [], initialRest = '') {
     const seriesRow = document.createElement('div');
     seriesRow.classList.add('series-row');
+
+    // Assurer qu'il y a au moins un palier si le tableau est vide
+    if (initialPaliers.length === 0) {
+        initialPaliers = [{ reps: null, weight: null }];
+    }
+
+    let paliersHtml = '';
+    initialPaliers.forEach((palier, palierIndex) => {
+        const reps = palier.reps !== null ? palier.reps : '';
+        const weight = palier.weight !== null ? palier.weight : '';
+        // The remove button for the first palier (index 0) should be hidden
+        // It should only be visible for subsequent paliers (drops).
+        const hideRemoveBtn = palierIndex === 0 ? 'remove-palier-btn-hidden' : ''; 
+
+        paliersHtml += `
+            <div class="palier-row" data-palier-index="${palierIndex}">
+                <div class="form-group palier-group">
+                    <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0" required>
+                </div>
+                <div class="form-group palier-group">
+                    <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0" required>
+                </div>
+                <button type="button" class="btn btn-danger small-btn remove-palier-btn ${hideRemoveBtn}">-</button>
+            </div>
+        `;
+    });
+
     seriesRow.innerHTML = `
-        <span class="series-label">Série ${seriesIndex + 1} :</span>
-        <div class="form-group">
-            <input type="number" class="form-control series-reps" placeholder="Répétitions" value="${reps}" min="0" required>
+        <div class="series-header-info">
+            <span class="series-label">Série ${seriesIndex + 1} :</span>
+            <button type="button" class="btn btn-danger remove-series-btn" title="Supprimer la série">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
         </div>
-        <div class="form-group">
-            <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="${weight}" min="0" required>
+        <div class="paliers-container">
+            ${paliersHtml}
         </div>
-        <div class="form-group">
-            <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${rest}" min="0"> </div>
-        <button type="button" class="btn btn-danger small-btn remove-series-btn">X</button>
+        <div class="series-bottom-actions">
+            <div class="form-group series-rest-group">
+                <input type="number" class="form-control series-rest" placeholder="Repos (s)" value="${initialRest !== null ? initialRest : ''}" min="0">
+            </div>
+            <button type="button" class="btn primary-btn small-btn add-palier-btn" ${initialPaliers.length >= 2 ? 'disabled' : ''}>Ajouter un drop</button>
+        </div>
     `;
     container.appendChild(seriesRow);
 
-    seriesRow.querySelector('.remove-series-btn').addEventListener('click', () => {
-        container.removeChild(seriesRow);
+    // Add event listeners for palier buttons
+    const paliersContainer = seriesRow.querySelector('.paliers-container');
+    const addPalierBtn = seriesRow.querySelector('.add-palier-btn');
+    const removeSeriesBtn = seriesRow.querySelector('.remove-series-btn');
+
+    addPalierBtn.addEventListener('click', () => {
+        const currentPaliersCount = paliersContainer.querySelectorAll('.palier-row').length;
+        if (currentPaliersCount >= 2) { // Limit to one drop (total 2 paliers: main + 1 drop)
+            return;
+        }
+        addPalierRow(paliersContainer, currentPaliersCount); // currentPaliersCount will be 1 for the first drop
+        addPalierBtn.disabled = true; // Disable after adding the drop
     });
+
+    paliersContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('remove-palier-btn')) {
+            const palierRow = event.target.closest('.palier-row');
+            const palierIndex = parseInt(palierRow.dataset.palierIndex);
+            
+            // Only allow removing if it's not the first palier (index 0)
+            if (palierIndex > 0) { 
+                paliersContainer.removeChild(palierRow);
+                addPalierBtn.disabled = false; // Re-enable add drop button after drop is removed
+            }
+        }
+    });
+
+    removeSeriesBtn.addEventListener('click', () => {
+        container.removeChild(seriesRow);
+        // Note: Actual data model update for removing series needs to happen at handleCompleteSessionSubmit
+        // This just removes the DOM element.
+    });
+}
+
+/**
+ * Ajoute une ligne de palier à l'intérieur d'une série dégressive.
+ * @param {HTMLElement} paliersContainer - Le conteneur des paliers.
+ * @param {number} palierIndex - L'index du nouveau palier.
+ */
+function addPalierRow(paliersContainer, palierIndex) {
+    const palierRow = document.createElement('div');
+    palierRow.classList.add('palier-row');
+    palierRow.dataset.palierIndex = palierIndex;
+    palierRow.innerHTML = `
+        <div class="form-group palier-group">
+            <input type="number" class="form-control series-reps" placeholder="Répétitions" value="" min="0" required>
+        </div>
+        <div class="form-group palier-group">
+            <input type="number" step="0.5" class="form-control series-weight" placeholder="Poids (kg)" value="" min="0" required>
+        </div>
+        <button type="button" class="btn btn-danger small-btn remove-palier-btn">-</button>
+    `;
+    paliersContainer.appendChild(palierRow);
 }
 
 
@@ -307,32 +395,47 @@ function handleCompleteSessionSubmit(sessionToComplete) {
         const seriesData = [];
 
         exerciseBlock.querySelectorAll('.series-row').forEach((seriesRow, seriesIndex) => {
-            const repsInput = seriesRow.querySelector('.series-reps');
-            const weightInput = seriesRow.querySelector('.series-weight');
-            const restInput = seriesRow.querySelector('.series-rest');
+            const paliers = [];
+            let seriesHasValidPalier = false;
 
-            const reps = repsInput.value.trim() !== '' ? parseInt(repsInput.value) : null;
-            const weight = weightInput.value.trim() !== '' ? parseFloat(weightInput.value) : null;
-            const rest = restInput.value.trim() !== '' ? parseInt(restInput.value) : null;
+            seriesRow.querySelectorAll('.palier-row').forEach(palierRow => {
+                const repsInput = palierRow.querySelector('.series-reps');
+                const weightInput = palierRow.querySelector('.series-weight');
 
-            // Validation : reps et weight sont obligatoires
-            if (reps === null || weight === null) {
+                const reps = repsInput.value.trim() !== '' ? parseInt(repsInput.value) : null;
+                const weight = weightInput.value.trim() !== '' ? parseFloat(weightInput.value) : null;
+
+                // Validation : reps et weight sont obligatoires pour chaque palier
+                if (reps === null || weight === null) {
+                    allFieldsValid = false;
+                    repsInput.style.borderColor = reps === null ? 'red' : '';
+                    weightInput.style.borderColor = weight === null ? 'red' : '';
+                } else {
+                    repsInput.style.borderColor = '';
+                    weightInput.style.borderColor = '';
+                    seriesHasValidPalier = true; // Au moins un palier valide dans cette série
+                }
+                paliers.push({ reps, weight });
+            });
+
+            // If a series has no valid paliers (e.g., all removed or empty), mark it as invalid
+            if (paliers.length === 0 || !seriesHasValidPalier) {
                 allFieldsValid = false;
-                repsInput.style.borderColor = reps === null ? 'red' : '';
-                weightInput.style.borderColor = weight === null ? 'red' : '';
+                seriesRow.style.border = '1px solid red'; // Highlight the whole series row
             } else {
-                repsInput.style.borderColor = '';
-                weightInput.style.borderColor = '';
+                seriesRow.style.border = '';
             }
-            restInput.style.borderColor = ''; // Réinitialiser le style pour le repos
 
-            seriesData.push({ reps, weight, rest });
+            const restInput = seriesRow.querySelector('.series-rest');
+            const rest = restInput.value.trim() !== '' ? parseInt(restInput.value) : null;
+            
+            seriesData.push({ paliers, rest });
         });
         updatedExercises.push({ name: exerciseName, series: seriesData });
     });
 
     if (!allFieldsValid) {
-        alert('Veuillez renseigner les champs "Répétitions" et "Poids (kg)" pour chaque série.');
+        alert('Veuillez renseigner les champs "Répétitions" et "Poids (kg)" pour chaque palier de chaque série.');
         return;
     }
 
@@ -592,10 +695,20 @@ function formatSessionDetails(session) {
         `;
         if (exercise.series && exercise.series.length > 0) {
             exercise.series.forEach((series, index) => {
-                const reps = series.reps !== null ? `${series.reps} reps` : 'N/A';
-                const weight = series.weight !== null ? `${series.weight} kg` : 'N/A';
-                const rest = series.rest !== null ? `${series.rest}s repos` : 'N/A';
-                detailsHtml += `<li>Série ${index + 1} : ${reps} @ ${weight} (${rest})</li>`;
+                let seriesText = `Série ${index + 1} : `;
+                if (series.paliers && series.paliers.length > 0) {
+                    const paliersText = series.paliers.map(palier => {
+                        const reps = palier.reps !== null ? `${palier.reps} reps` : 'N/A';
+                        const weight = palier.weight !== null ? `${palier.weight} kg` : 'N/A';
+                        return `${reps} @ ${weight}`;
+                    }).join(' -> '); // Use '->' for degressive sets
+                    seriesText += paliersText;
+                } else {
+                    seriesText += 'Pas de paliers enregistrés';
+                }
+
+                const rest = series.rest !== null ? ` (${series.rest}s repos)` : '';
+                detailsHtml += `<li>${seriesText}${rest}</li>`;
             });
         } else {
             detailsHtml += '<li>Pas de séries enregistrées pour cet exercice.</li>';

@@ -38,7 +38,7 @@ body {
 }
 
 .container {
-    max-width: 960px;
+    max-width: 960px; /* Conserver une largeur maximale pour desktop */
     margin: 20px auto;
     padding: 20px;
     background-color: var(--color-white);
@@ -56,26 +56,26 @@ h1, h2, h3, h4 {
 .main-header {
     background-color: var(--color-dark);
     color: var(--color-white);
-    padding: 0.75rem 0; /* Réduire le padding vertical global de l'en-tête */
+    padding: 0.75rem 0;
     text-align: center;
     box-shadow: var(--shadow-sm);
 }
 
 .main-header h1 {
-    display: none; /* Cache le titre de l'application pour gagner de la place */
+    display: none;
 }
 
 .main-header nav {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    padding: 0.25rem 1rem; /* Réduire le padding vertical de la navigation */
-    flex-wrap: wrap; /* Pour la responsivité des boutons de navigation */
+    padding: 0.25rem 1rem;
+    flex-wrap: wrap;
 }
 
 .main-header .nav-btn {
-    background-color: var(--color-dark); /* Fond sombre pour les inactifs */
-    color: var(--color-white); /* Texte blanc pour les inactifs */
+    background-color: var(--color-dark);
+    color: var(--color-white);
     border: none;
     padding: 0.75rem 1.25rem;
     border-radius: 5px;
@@ -85,20 +85,19 @@ h1, h2, h3, h4 {
 }
 
 .main-header .nav-btn:hover {
-    background-color: var(--color-blue-dark); /* Hover pour les inactifs */
-    color: var(--color-white); /* Texte blanc pour les inactifs */
+    background-color: var(--color-blue-dark);
+    color: var(--color-white);
 }
 
 .main-header .nav-btn.active-nav-btn {
-    background-color: var(--color-primary); /* Fond clair pour le bouton actif */
-    color: var(--color-dark); /* Texte sombre pour le bouton actif */
-    border: 1px solid var(--color-primary); /* Bordure assortie */
+    background-color: var(--color-primary);
+    color: var(--color-dark);
+    border: 1px solid var(--color-primary);
     font-weight: bold;
 }
-/* S'assurer que le hover sur l'actif est aussi distinct */
 .main-header .nav-btn.active-nav-btn:hover {
-    background-color: var(--color-primary); /* Garde la même couleur de fond au hover */
-    color: var(--color-dark); /* Garde la même couleur de texte au hover */
+    background-color: var(--color-primary);
+    color: var(--color-dark);
 }
 
 /* Footer */
@@ -107,12 +106,12 @@ h1, h2, h3, h4 {
     color: var(--color-grey);
     text-align: center;
     padding: 1rem 0;
-    margin-top: auto; /* Pousse le footer en bas */
+    margin-top: auto;
 }
 
 /* Boutons Génériques */
 .btn {
-    display: inline-flex; /* Utiliser flex pour le centrage du contenu des boutons */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0.6rem 1.2rem;
@@ -123,7 +122,7 @@ h1, h2, h3, h4 {
     cursor: pointer;
     font-size: 0.95rem;
     transition: all 0.3s ease;
-    text-decoration: none; /* Pour les boutons utilisés comme liens */
+    text-decoration: none;
     text-align: center;
 }
 
@@ -168,28 +167,26 @@ h1, h2, h3, h4 {
     margin-left: 0.5rem;
 }
 
-/* Nouveaux styles pour les boutons et séparateurs */
 .buttons-container {
     display: flex;
-    flex-wrap: wrap; /* Permet aux boutons de passer à la ligne sur petits écrans */
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 1rem; /* Espacement entre les boutons */
+    gap: 1rem;
     margin-top: 2rem;
 }
 
 .section-divider {
     border: none;
-    border-top: 2px dashed var(--color-grey-light); /* Ligne pointillée pour la séparation */
+    border-top: 2px dashed var(--color-grey-light);
     margin: 3rem 0;
 }
 
 .btn.large-btn {
     padding: 0.8rem 1.5rem;
     font-size: 1.1rem;
-    min-width: 200px; /* Assure une taille minimale sur mobile */
+    min-width: 200px;
 }
 
-/* Couleurs de boutons modernes (réutilisant les variables existantes) */
 .btn.primary-btn {
     background-color: var(--color-blue);
     color: var(--color-white);
@@ -230,12 +227,12 @@ h1, h2, h3, h4 {
 }
 
 .form-control {
-    width: calc(100% - 1.5rem); /* Prend toute la largeur moins le padding */
+    width: calc(100% - 1.5rem);
     padding: 0.75rem;
     border: 1px solid var(--color-grey);
     border-radius: 5px;
     font-size: 1rem;
-    box-sizing: border-box; /* Inclut padding et bordure dans la largeur */
+    box-sizing: border-box;
 }
 
 .form-control:focus {
@@ -246,37 +243,33 @@ h1, h2, h3, h4 {
 
 /* Section "Nouvelle Séance" */
 .create-session-section h2 {
-    display: none; /* Cache le titre "Nouvelle Séance" */
+    display: none;
 }
 
-/* Style pour les blocs d'exercices planifiés */
 .exercise-block {
     background-color: var(--color-light);
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
     box-shadow: var(--shadow-sm);
-    position: relative; /* IMPORTANT pour le positionnement absolu du bouton */
+    position: relative;
 }
 
-/* --- MODIFICATION POUR LE BOUTON 'X' DANS 'NOUVELLE SÉANCE' (EN BAS À DROITE) --- */
 .create-session-section .exercise-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
-    /* Supprimez ou assurez-vous qu'il n'y a pas de `position: absolute` ici */
 }
 
 .create-session-section .exercise-name {
-    flex-grow: 1; /* Permet à l'input de prendre l'espace disponible */
-    /* Assurez-vous que le padding-right n'est pas trop grand s'il était là */
+    flex-grow: 1;
 }
 
 .create-session-section .remove-exercise-btn {
-    position: absolute; /* Positionnement absolu par rapport au parent .exercise-block */
-    bottom: 10px; /* Distance du bas */
-    right: 10px; /* Distance de la droite */
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
     width: 32px;
     height: 32px;
     font-size: 1rem;
@@ -286,43 +279,41 @@ h1, h2, h3, h4 {
     padding: 0;
     border-radius: 50%;
     box-shadow: var(--shadow-xs);
-    z-index: 10; /* S'assure qu'il est au-dessus des autres éléments */
-    /* Supprimez flex-shrink, margin-left, transform, top, right si présents */
-    flex-shrink: unset;
-    margin-left: unset;
-    transform: none;
-    top: auto;
-    left: auto;
+    z-index: 10;
+    background-color: var(--color-red);
+    color: var(--color-white);
+    border: none;
+}
+.create-session-section .remove-exercise-btn:hover {
+    background-color: var(--color-danger-dark);
 }
 
-/* Ajustement pour le champ Nombre de séries planifiées si nécessaire */
 .create-session-section .num-series {
-    max-width: 150px; /* Ou une valeur qui semble bonne pour toi */
+    max-width: 150px;
 }
 
 
 /* Section "Mes Séances" */
 .view-sessions-section h2 {
-    display: none; /* Cache le titre de la page "Mes Séances" */
+    display: none;
 }
 
 .view-sessions-section #filterToggleBtn {
-    margin-bottom: 0.5rem; /* Réduire légèrement pour le rapprocher des filtres */
+    margin-bottom: 0.5rem;
 }
 
-/* Styles pour la section de filtre */
 .filter-controls {
     background-color: var(--color-light);
-    padding: 1rem; /* Réduire le padding général */
+    padding: 1rem;
     border-radius: 8px;
-    margin-top: 0.5rem; /* Réduire cette marge pour le rapprocher du bouton toggle */
-    margin-bottom: 1.5rem; /* Réduire la marge en dessous */
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
     box-shadow: var(--shadow-sm);
-    display: flex; /* Utiliser flexbox */
-    flex-wrap: wrap; /* Permettre le passage à la ligne */
-    gap: 0.75rem; /* Réduire l'espacement entre les éléments de filtre */
-    align-items: flex-end; /* Aligner les labels en haut et les inputs en bas */
-    justify-content: space-between; /* Espacement entre les groupes de formulaires */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    justify-content: space-between;
 }
 
 .filter-controls.hidden {
@@ -330,37 +321,35 @@ h1, h2, h3, h4 {
 }
 
 .filter-controls .form-group {
-    flex: 1; /* Chaque groupe de formulaire prend de l'espace */
-    min-width: 150px; /* Réduire la largeur minimale */
+    flex: 1;
+    min-width: 150px;
     display: flex;
-    flex-direction: column; /* Label au-dessus de l'input */
-    margin-bottom: 0.5rem; /* Réduire l'espacement entre les groupes sur petits écrans */
+    flex-direction: column;
+    margin-bottom: 0.5rem;
 }
 
 .filter-controls label {
-    font-size: 0.9rem; /* Réduire la taille de la police du label */
-    margin-bottom: 0.3rem; /* Réduire la marge sous le label */
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
 }
 
 .filter-controls .form-control {
-    padding: 0.6rem; /* Réduire le padding des inputs/selects */
-    font-size: 0.9rem; /* Réduire la taille de la police des inputs/selects */
+    padding: 0.6rem;
+    font-size: 0.9rem;
 }
 
-
-/* Le bouton "Réinitialiser filtres" */
 #resetFiltersBtn {
-    margin-top: 1rem; /* Réduire la marge au-dessus du bouton de réinitialisation */
-    align-self: flex-end; /* Pour l'aligner en bas avec les inputs */
-    padding: 0.5rem 1rem; /* Ajuster le padding du bouton */
-    font-size: 0.85rem; /* Ajuster la taille de la police du bouton */
+    margin-top: 1rem;
+    align-self: flex-end;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
 }
 
 .sessions-list {
     display: grid;
     gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
-    margin-top: 0; /* Assurez-vous qu'il n'y a pas de marge excessive ici */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 0;
 }
 
 .session-card {
@@ -371,8 +360,8 @@ h1, h2, h3, h4 {
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
-    flex-direction: column; /* Permet au contenu de s'empiler */
-    position: relative; /* Pour positionner le bouton de suppression */
+    flex-direction: column;
+    position: relative;
 }
 
 .session-card:hover {
@@ -430,7 +419,7 @@ h1, h2, h3, h4 {
     cursor: pointer;
     padding: 0.5rem;
     transition: color 0.2s ease;
-    display: flex; /* Permet de centrer l'icône SVG */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -453,7 +442,7 @@ h1, h2, h3, h4 {
 /* Section "Séance du Jour" (pour la complétion) */
 .today-session-section .exercise-header {
     display: flex;
-    justify-content: space-between; /* Pour un titre et un bouton potentiellement */
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
 }
@@ -461,63 +450,151 @@ h1, h2, h3, h4 {
 .today-session-section .exercise-name-display {
     font-size: 1.2rem;
     font-weight: bold;
-    flex-grow: 1; /* Permet au nom de prendre de l'espace */
+    flex-grow: 1;
 }
 
-/* --- MODIFICATION POUR LE BOUTON 'X' DANS 'SÉANCE DU JOUR' (POSITIONNEMENT) --- */
+/* Styles pour les lignes de série et les paliers */
 .series-row {
-    display: flex;
-    align-items: center; /* Aligner verticalement tous les éléments */
-    gap: 0.75rem; /* Espace entre les champs */
-    margin-bottom: 0.75rem;
     background-color: var(--color-white);
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 2.5rem 0.75rem 3rem;
     border-radius: 5px;
     box-shadow: var(--shadow-xs);
-    position: relative; /* IMPORTANT : doit être relative pour positionner le bouton absolument */
+    margin-bottom: 0.75rem;
+    display: grid; /* Utiliser Grid pour une meilleure disposition sur desktop */
+    grid-template-columns: auto 1fr auto; /* Série Label | Paliers Container | Delete Series Btn */
+    grid-template-rows: auto auto; /* Header row | Bottom actions row */
+    align-items: start;
+    gap: 0.5rem 1rem; /* gap vertical et horizontal */
+    position: relative;
+}
+
+.series-row .series-header-info {
+    grid-column: 1 / span 3; /* S'étend sur toutes les colonnes pour le header */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem; /* Espace sous le titre de série */
+    flex-wrap: wrap; /* Pour gérer le wrap sur les petits écrans */
 }
 
 .series-row .series-label {
-    flex-shrink: 0; /* Empêche le label de rétrécir */
     font-weight: bold;
-    min-width: 60px; /* Maintient une largeur minimale pour le label */
-}
-
-.series-row .form-group {
-    flex-grow: 1; /* Permet aux groupes de champs de prendre l'espace disponible */
-    flex-basis: 0; /* Base de taille flexible, combinée avec flex-grow */
-    min-width: 80px; /* Largeur minimale pour chaque champ sur des écrans plus grands */
-    margin-bottom: 0; /* Pas de marge verticale entre les groupes de la même ligne */
-}
-
-.series-row .form-control {
-    width: 100%; /* S'assure que l'input remplit bien son groupe */
+    font-size: 1.05rem;
+    color: var(--color-dark);
+    flex-shrink: 0;
 }
 
 .series-row .remove-series-btn {
-    /* Style par défaut pour les grands écrans */
-    flex-shrink: 0;
-    margin-left: auto; /* Pousse le bouton à l'extrême droite */
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    background: none; /* Pas de fond pour l'icône de suppression de série */
+    border: none;
+    color: var(--color-red);
+    cursor: pointer;
+    padding: 0.2rem; /* Réduire le padding */
+    transition: color 0.2s ease, transform 0.2s ease;
+    font-size: 1.2rem; /* Taille de l'icône */
+    line-height: 1; /* Alignement */
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: none; /* Pas d'ombre */
+    border-radius: 50%; /* Si on veut un effet cercle */
+    width: 30px; /* Taille fixe */
+    height: 30px; /* Taille fixe */
+    flex-shrink: 0;
+}
+.series-row .remove-series-btn:hover {
+    color: var(--color-danger-dark);
+    background-color: rgba(231, 76, 60, 0.1); /* Léger fond au survol */
+    transform: rotate(5deg);
+}
+
+.series-row .paliers-container {
+    grid-column: 1 / span 3; /* Prend toute la largeur sous le header */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%; /* Assure que le conteneur prend la largeur max */
+}
+
+.series-row .palier-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    background-color: var(--color-light); /* Léger fond pour les paliers */
+    padding: 0.5rem;
+    border-radius: 4px;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.05); /* Petite ombre interne */
+}
+
+.series-row .palier-group {
+    flex-grow: 1;
+    margin-bottom: 0;
+    display: flex;
+    flex-basis: calc(50% - 0.5rem); /* Pour que les 2 inputs soient sur une ligne */
+}
+.series-row .palier-group input {
+    width: 100%;
+}
+
+.series-row .remove-palier-btn {
+    background-color: var(--color-grey); /* Couleur neutre pour le bouton moins */
+    color: var(--color-white);
+    border: none;
+    width: 24px; /* Plus petit */
+    height: 24px; /* Plus petit */
     padding: 0;
+    font-size: 1.2rem; /* Taille du signe moins */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
-    box-shadow: var(--shadow-xs);
-    position: static; /* Par défaut, statique pour flexbox */
-    top: auto;
-    left: auto;
-    transform: none;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.3s ease, pointer-events 0.3s ease;
+}
+.series-row .remove-palier-btn:hover {
+    background-color: var(--color-grey-dark);
+    transform: scale(1.1);
+}
+
+/* Style pour cacher le bouton de suppression du palier quand il est unique */
+.hidden-on-single-palier {
+    opacity: 0; /* Rendre invisible */
+    pointer-events: none; /* Désactiver les interactions de la souris */
+}
+
+
+.series-row .series-bottom-actions {
+    grid-column: 1 / span 3; /* Prend toute la largeur en bas */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--color-grey-light);
+}
+
+.series-row .series-rest-group {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+.series-row .series-rest {
+    max-width: 120px; /* Limiter la largeur du champ repos */
+}
+
+.series-row .add-palier-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
 }
 
 
 .today-session-section .buttons-container.series-action-buttons {
-    justify-content: flex-end; /* Aligner le bouton "Ajouter une série" à droite */
+    justify-content: flex-end;
     margin-top: 0.5rem;
-    margin-bottom: 2rem; /* Espace après chaque bloc exercice */
+    margin-bottom: 2rem;
 }
 
 /* Section "Détails de Séance Complétée" */
@@ -566,7 +643,7 @@ h1, h2, h3, h4 {
 .session-completion-header {
     background-color: var(--color-primary-light);
     padding: 1.5rem;
-    margin: -1.5rem -1.5rem 2rem -1.5rem; /* Pour étirer l'en-tête et coller aux bords */
+    margin: -1.5rem -1.5rem 2rem -1.5rem;
     border-radius: 8px 8px 0 0;
     text-align: center;
 }
@@ -578,12 +655,12 @@ h1, h2, h3, h4 {
 }
 
 .session-completion-buttons-header {
-    justify-content: center; /* Centrer les boutons dans le header */
+    justify-content: center;
 }
 
 /* Ajustements pour les formulaires internes dans la section de complétion */
 .today-session-section form#completeSessionForm {
-    padding: 0; /* Plus de padding ici si l'en-tête prend en charge le padding global */
+    padding: 0;
 }
 
 /* Media Queries pour la Responsivité */
@@ -591,50 +668,48 @@ h1, h2, h3, h4 {
     .container {
         margin: 10px auto;
         padding: 15px;
-        border-radius: 0; /* Pas de bords arrondis sur tout l'écran */
-        box-shadow: none; /* Pas d'ombre sur tout l'écran */
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .main-header {
-        padding: 0.5rem 0; /* Encore plus réduit sur mobile */
+        padding: 0.5rem 0;
     }
 
     .main-header h1 {
-        display: none; /* Cache le titre de l'application pour gagner de la place */
+        display: none;
     }
 
     .main-header nav {
         flex-direction: column;
-        gap: 0.5rem; /* Réduire l'espacement entre les boutons sur mobile */
-        padding: 0.25rem; /* Ajuster le padding de la nav sur mobile */
+        gap: 0.5rem;
+        padding: 0.25rem;
     }
 
     .main-header .nav-btn {
         width: 100%;
-        max-width: 200px; /* Limiter la largeur max des boutons pour un meilleur centrage */
-        margin: 0 auto; /* Centrer les boutons empilés */
-        padding: 0.6rem 1rem; /* Ajuster le padding des boutons pour les rendre un peu plus petits */
-        font-size: 0.9rem; /* Ajuster la taille de la police des boutons */
+        max-width: 200px;
+        margin: 0 auto;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
 
     /* Boutons génériques */
     .buttons-container .btn {
-        width: 100%; /* Les boutons prennent toute la largeur */
-        max-width: 300px; /* Limite la largeur max sur des écrans un peu plus grands */
+        width: 100%;
+        max-width: 300px;
     }
 
     /* Exercices planifiés (bouton en bas à droite) */
     .create-session-section .exercise-header {
-        flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
-        justify-content: flex-start; /* Aligner à gauche */
+        flex-wrap: wrap;
+        justify-content: flex-start;
     }
     .create-session-section .exercise-name {
-        width: 100%; /* Prend toute la largeur disponible */
+        width: 100%;
         margin-right: 0;
-        margin-bottom: 0.75rem; /* Espace sous le nom de l'exercice */
+        margin-bottom: 0.75rem;
     }
-    /* Le bouton .remove-exercise-btn reste positionné absolument en bas à droite */
-
 
     /* Filtres */
     .filter-controls {
@@ -667,42 +742,72 @@ h1, h2, h3, h4 {
         width: 100%;
     }
 
-    /* --- MODIFICATION POUR LE BOUTON 'X' DANS 'SÉANCE DU JOUR' (POSITIONNEMENT MOBILE) --- */
+    /* Séries de complétion de séance */
     .series-row {
-        flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
-        justify-content: flex-start; /* Aligner les éléments au début */
+        grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+        gap: 0.5rem; /* Réduire l'écartement */
+        padding: 0.75rem 1.5rem 0.5rem 2.5rem; /* Ajuster le padding */
+    }
+
+    .series-row .series-header-info {
+        grid-column: 1 / -1; /* Prend toute la largeur */
+        flex-direction: row; /* Aligner label et bouton sur la même ligne */
+        justify-content: space-between;
         align-items: center;
-        padding: 0.75rem 40px 0.75rem 0.75rem; /* Ajouter du padding à droite pour le bouton */
+        margin-bottom: 0.5rem;
     }
 
     .series-row .series-label {
-        flex-basis: 100%; /* Le label prend toute la largeur sur mobile */
-        margin-bottom: 0.5rem; /* Espace après le label */
-        margin-right: 0;
-        order: 1; /* Ordre pour s'assurer qu'il est en haut */
+        font-size: 1rem; /* Réduire un peu la taille du label */
+        margin-bottom: 0;
     }
 
     .series-row .remove-series-btn {
-        position: absolute; /* Positionnement absolu pour le mobile */
-        top: 10px; /* Distance du haut */
-        right: 10px; /* Distance de la droite */
-        left: auto; /* S'assurer qu'il n'y a pas de left conflictuel */
-        margin-left: 0; /* Annuler le auto-margin */
-        order: 0; /* Assurer qu'il est affiché en premier, même s'il est absolu */
-        width: 28px;
-        height: 28px;
+        /* Garder le style général défini pour mobile/desktop, pas de positionnement absolu ici */
+        position: static; /* Important : réinitialiser pour qu'il soit dans le flux */
+        margin-left: 0.5rem; /* Ajuster l'espacement si besoin */
+        padding: 0.2rem;
     }
 
-    .series-row .form-group {
-        flex-basis: calc(50% - 0.5rem); /* Deux champs par ligne sur mobile */
-        min-width: unset;
-        margin-bottom: 0.5rem; /* Ajout d'une marge entre les groupes sur mobile */
-        order: 2; /* Les champs viennent après le label et le bouton */
+    .series-row .paliers-container {
+        grid-column: 1 / -1;
+        width: 100%;
     }
 
-    .series-row .form-group:nth-of-type(3) {
-        flex-basis: 100%; /* Le troisième champ prend toute la largeur si pas de place */
-        order: 3; /* Ordre pour le dernier champ */
+    .series-row .palier-row {
+        flex-direction: row; /* Garder les inputs sur la même ligne si possible */
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.4rem; /* Réduire le padding des paliers */
+    }
+
+    .series-row .palier-group {
+        flex-basis: calc(50% - 0.5rem);
+        margin-bottom: 0;
+    }
+
+    .series-row .remove-palier-btn {
+        margin-left: 0.5rem;
+    }
+
+    .series-row .series-bottom-actions {
+        grid-column: 1 / -1;
+        flex-direction: column; /* Empiler les actions du bas */
+        align-items: stretch; /* Étirer les boutons */
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .series-row .series-rest-group {
+        width: 100%;
+        max-width: none; /* Supprimer la limite de largeur */
+        margin-bottom: 0;
+    }
+
+    .series-row .add-palier-btn {
+        width: 100%; /* Étirer le bouton "Ajouter un drop" */
+        padding: 0.6rem 1rem; /* Ajuster padding */
     }
 
 
